@@ -1,0 +1,1 @@
+json database plan: https://dbdiagram.io/d/PC_Configurator_db-6a97fa525450bea1becb3105
