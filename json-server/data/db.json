@@ -1,10 +1,98 @@
 {
-  "posts": [
-    { "id": 1, "title": "Lorem ipsum", "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
-    { "id": 2, "title": "Sed et semper lectus", "content": "Nullam non quam et dui pharetra faucibus id vel libero."}
+  "processors": [
+    {"id":1,"name":"AMD Ryzen 5 7600","brand":"AMD","price":67000,"socket":"AM5","cores":6,"threads":12,"baseClock":3.8,"boostClock":5.1,"tdp":65},
+    {"id":2,"name":"AMD Ryzen 5 7600X","brand":"AMD","price":73000,"socket":"AM5","cores":6,"threads":12,"baseClock":4.7,"boostClock":5.3,"tdp":105},
+    {"id":3,"name":"AMD Ryzen 7 7700","brand":"AMD","price":90000,"socket":"AM5","cores":8,"threads":16,"baseClock":3.8,"boostClock":5.3,"tdp":65},
+    {"id":4,"name":"AMD Ryzen 7 7800X3D","brand":"AMD","price":125000,"socket":"AM5","cores":8,"threads":16,"baseClock":4.2,"boostClock":5.0,"tdp":120},
+    {"id":5,"name":"AMD Ryzen 9 7900X","brand":"AMD","price":145000,"socket":"AM5","cores":12,"threads":24,"baseClock":4.7,"boostClock":5.6,"tdp":170},
+    {"id":6,"name":"AMD Ryzen 9 7950X","brand":"AMD","price":175000,"socket":"AM5","cores":16,"threads":32,"baseClock":4.5,"boostClock":5.7,"tdp":170},
+    {"id":7,"name":"Intel Core i5-13400F","brand":"Intel","price":65000,"socket":"LGA1700","cores":10,"threads":16,"baseClock":2.5,"boostClock":4.6,"tdp":148},
+    {"id":8,"name":"Intel Core i5-14600K","brand":"Intel","price":96000,"socket":"LGA1700","cores":14,"threads":20,"baseClock":3.5,"boostClock":5.3,"tdp":181},
+    {"id":9,"name":"Intel Core i7-14700K","brand":"Intel","price":145000,"socket":"LGA1700","cores":20,"threads":28,"baseClock":3.4,"boostClock":5.6,"tdp":253},
+    {"id":10,"name":"Intel Core i9-14900K","brand":"Intel","price":185000,"socket":"LGA1700","cores":24,"threads":32,"baseClock":3.2,"boostClock":6.0,"tdp":253}
   ],
-  "comments": [
-    { "id": 1, "text": "baz", "postId": 1 },
-    { "id": 1, "text": "qux", "postId": 2 }
+  "gpus": [
+    {"id":1,"name":"NVIDIA GeForce RTX 4060 8GB","brand":"NVIDIA","price":125000,"interface":"PCIe x16","vram":8,"memoryType":"GDDR6","tdp":115},
+    {"id":2,"name":"NVIDIA GeForce RTX 4060 Ti 8GB","brand":"NVIDIA","price":165000,"interface":"PCIe x16","vram":8,"memoryType":"GDDR6","tdp":160},
+    {"id":3,"name":"NVIDIA GeForce RTX 4070 12GB","brand":"NVIDIA","price":220000,"interface":"PCIe x16","vram":12,"memoryType":"GDDR6X","tdp":200},
+    {"id":4,"name":"NVIDIA GeForce RTX 4070 SUPER 12GB","brand":"NVIDIA","price":245000,"interface":"PCIe x16","vram":12,"memoryType":"GDDR6X","tdp":220},
+    {"id":5,"name":"NVIDIA GeForce RTX 4070 Ti SUPER 16GB","brand":"NVIDIA","price":310000,"interface":"PCIe x16","vram":16,"memoryType":"GDDR6X","tdp":285},
+    {"id":6,"name":"NVIDIA GeForce RTX 4080 SUPER 16GB","brand":"NVIDIA","price":450000,"interface":"PCIe x16","vram":16,"memoryType":"GDDR6X","tdp":320},
+    {"id":7,"name":"AMD Radeon RX 7600 8GB","brand":"AMD","price":125000,"interface":"PCIe x16","vram":8,"memoryType":"GDDR6","tdp":165},
+    {"id":8,"name":"AMD Radeon RX 7600 XT 16GB","brand":"AMD","price":155000,"interface":"PCIe x16","vram":16,"memoryType":"GDDR6","tdp":190},
+    {"id":9,"name":"AMD Radeon RX 7700 XT 12GB","brand":"AMD","price":185000,"interface":"PCIe x16","vram":12,"memoryType":"GDDR6","tdp":245},
+    {"id":10,"name":"AMD Radeon RX 7800 XT 16GB","brand":"AMD","price":210000,"interface":"PCIe x16","vram":16,"memoryType":"GDDR6","tdp":263}
+  ],
+  "motherboards": [
+    {"id":1,"name":"MSI PRO B650-S WIFI","brand":"MSI","price":65000,"cpuSocket":"AM5","ramType":"DDR5","gpuInterface":"PCIe x16","formFactor":"ATX","storageInterfaces":["M.2 NVMe","SATA"]},
+    {"id":2,"name":"Gigabyte B650 EAGLE AX","brand":"Gigabyte","price":46000,"cpuSocket":"AM5","ramType":"DDR5","gpuInterface":"PCIe x16","formFactor":"ATX","storageInterfaces":["M.2 NVMe","SATA"]},
+    {"id":3,"name":"Gigabyte B650 GAMING X AX V2","brand":"Gigabyte","price":56000,"cpuSocket":"AM5","ramType":"DDR5","gpuInterface":"PCIe x16","formFactor":"ATX","storageInterfaces":["M.2 NVMe","SATA"]},
+    {"id":4,"name":"ASUS TUF GAMING B650-PLUS WIFI","brand":"ASUS","price":70000,"cpuSocket":"AM5","ramType":"DDR5","gpuInterface":"PCIe x16","formFactor":"ATX","storageInterfaces":["M.2 NVMe","SATA"]},
+    {"id":5,"name":"MSI MAG B650 TOMAHAWK WIFI","brand":"MSI","price":80000,"cpuSocket":"AM5","ramType":"DDR5","gpuInterface":"PCIe x16","formFactor":"ATX","storageInterfaces":["M.2 NVMe","SATA"]},
+    {"id":6,"name":"MSI PRO B760-P WIFI DDR4","brand":"MSI","price":57000,"cpuSocket":"LGA1700","ramType":"DDR4","gpuInterface":"PCIe x16","formFactor":"ATX","storageInterfaces":["M.2 NVMe","SATA"]},
+    {"id":7,"name":"MSI PRO B760-P WIFI DDR5","brand":"MSI","price":60000,"cpuSocket":"LGA1700","ramType":"DDR5","gpuInterface":"PCIe x16","formFactor":"ATX","storageInterfaces":["M.2 NVMe","SATA"]},
+    {"id":8,"name":"Gigabyte B760 GAMING X AX","brand":"Gigabyte","price":65000,"cpuSocket":"LGA1700","ramType":"DDR5","gpuInterface":"PCIe x16","formFactor":"ATX","storageInterfaces":["M.2 NVMe","SATA"]},
+    {"id":9,"name":"ASUS TUF GAMING B760-PLUS WIFI","brand":"ASUS","price":70000,"cpuSocket":"LGA1700","ramType":"DDR5","gpuInterface":"PCIe x16","formFactor":"ATX","storageInterfaces":["M.2 NVMe","SATA"]},
+    {"id":10,"name":"MSI MAG Z790 TOMAHAWK WIFI","brand":"MSI","price":100000,"cpuSocket":"LGA1700","ramType":"DDR5","gpuInterface":"PCIe x16","formFactor":"ATX","storageInterfaces":["M.2 NVMe","SATA"]}
+  ],
+  "ram": [
+    {"id":1,"name":"Kingston FURY Beast 16GB DDR5-5200","brand":"Kingston","price":20000,"ramType":"DDR5","capacity":16,"speed":5200},
+    {"id":2,"name":"Kingston FURY Beast 32GB DDR5-5200","brand":"Kingston","price":39000,"ramType":"DDR5","capacity":32,"speed":5200},
+    {"id":3,"name":"Kingston FURY Beast 32GB DDR5-6000","brand":"Kingston","price":43000,"ramType":"DDR5","capacity":32,"speed":6000},
+    {"id":4,"name":"G.Skill Flare X5 32GB DDR5-6000","brand":"G.Skill","price":45000,"ramType":"DDR5","capacity":32,"speed":6000},
+    {"id":5,"name":"G.Skill Trident Z5 32GB DDR5-6000","brand":"G.Skill","price":52000,"ramType":"DDR5","capacity":32,"speed":6000},
+    {"id":6,"name":"Corsair Vengeance 32GB DDR5-6000","brand":"Corsair","price":44000,"ramType":"DDR5","capacity":32,"speed":6000},
+    {"id":7,"name":"Corsair Vengeance 64GB DDR5-6000","brand":"Corsair","price":80000,"ramType":"DDR5","capacity":64,"speed":6000},
+    {"id":8,"name":"Kingston FURY Beast 16GB DDR4-3200","brand":"Kingston","price":15000,"ramType":"DDR4","capacity":16,"speed":3200},
+    {"id":9,"name":"Kingston FURY Beast 32GB DDR4-3200","brand":"Kingston","price":28000,"ramType":"DDR4","capacity":32,"speed":3200},
+    {"id":10,"name":"Corsair Vengeance LPX 32GB DDR4-3200","brand":"Corsair","price":29000,"ramType":"DDR4","capacity":32,"speed":3200}
+  ],
+  "storage": [
+    {"id":1,"name":"Samsung 990 EVO 1TB","brand":"Samsung","price":38000,"storageType":"NVMe SSD","interface":"M.2 NVMe","capacity":1000},
+    {"id":2,"name":"Samsung 990 PRO 1TB","brand":"Samsung","price":43000,"storageType":"NVMe SSD","interface":"M.2 NVMe","capacity":1000},
+    {"id":3,"name":"Samsung 990 PRO 2TB","brand":"Samsung","price":70000,"storageType":"NVMe SSD","interface":"M.2 NVMe","capacity":2000},
+    {"id":4,"name":"WD Black SN770 1TB","brand":"Western Digital","price":30000,"storageType":"NVMe SSD","interface":"M.2 NVMe","capacity":1000},
+    {"id":5,"name":"WD Black SN850X 1TB","brand":"Western Digital","price":35000,"storageType":"NVMe SSD","interface":"M.2 NVMe","capacity":1000},
+    {"id":6,"name":"Kingston KC3000 1TB","brand":"Kingston","price":32000,"storageType":"NVMe SSD","interface":"M.2 NVMe","capacity":1000},
+    {"id":7,"name":"Kingston NV2 1TB","brand":"Kingston","price":25000,"storageType":"NVMe SSD","interface":"M.2 NVMe","capacity":1000},
+    {"id":8,"name":"Crucial P3 Plus 1TB","brand":"Crucial","price":28000,"storageType":"NVMe SSD","interface":"M.2 NVMe","capacity":1000},
+    {"id":9,"name":"Samsung 870 EVO 1TB","brand":"Samsung","price":32000,"storageType":"SATA SSD","interface":"SATA","capacity":1000},
+    {"id":10,"name":"Crucial MX500 1TB","brand":"Crucial","price":30000,"storageType":"SATA SSD","interface":"SATA","capacity":1000}
+  ],
+  "powerSupplies": [
+    {"id":1,"name":"Corsair RM650e","brand":"Corsair","price":40000,"wattage":650,"efficiency":"80+ Gold"},
+    {"id":2,"name":"Corsair RM750e","brand":"Corsair","price":45000,"wattage":750,"efficiency":"80+ Gold"},
+    {"id":3,"name":"Corsair RM850e","brand":"Corsair","price":52000,"wattage":850,"efficiency":"80+ Gold"},
+    {"id":4,"name":"be quiet! Pure Power 12 M 650W","brand":"be quiet!","price":45000,"wattage":650,"efficiency":"80+ Gold"},
+    {"id":5,"name":"be quiet! Pure Power 12 M 750W","brand":"be quiet!","price":50000,"wattage":750,"efficiency":"80+ Gold"},
+    {"id":6,"name":"be quiet! Pure Power 12 M 850W","brand":"be quiet!","price":58000,"wattage":850,"efficiency":"80+ Gold"},
+    {"id":7,"name":"MSI MAG A650GL PCIE5","brand":"MSI","price":39000,"wattage":650,"efficiency":"80+ Gold"},
+    {"id":8,"name":"MSI MAG A750GL PCIE5","brand":"MSI","price":44000,"wattage":750,"efficiency":"80+ Gold"},
+    {"id":9,"name":"Seasonic Focus GX-750","brand":"Seasonic","price":52000,"wattage":750,"efficiency":"80+ Gold"},
+    {"id":10,"name":"Seasonic Focus GX-850","brand":"Seasonic","price":59000,"wattage":850,"efficiency":"80+ Gold"}
+  ],
+  "cases": [
+    {"id":1,"name":"NZXT H5 Flow","brand":"NZXT","price":35000,"supportedFormFactor":"ATX"},
+    {"id":2,"name":"NZXT H6 Flow","brand":"NZXT","price":50000,"supportedFormFactor":"ATX"},
+    {"id":3,"name":"Corsair 4000D Airflow","brand":"Corsair","price":40000,"supportedFormFactor":"ATX"},
+    {"id":4,"name":"Corsair 5000D Airflow","brand":"Corsair","price":55000,"supportedFormFactor":"ATX"},
+    {"id":5,"name":"Fractal Design Pop Air","brand":"Fractal Design","price":38000,"supportedFormFactor":"ATX"},
+    {"id":6,"name":"Fractal Design North","brand":"Fractal Design","price":55000,"supportedFormFactor":"ATX"},
+    {"id":7,"name":"Lian Li LANCOOL 216","brand":"Lian Li","price":48000,"supportedFormFactor":"ATX"},
+    {"id":8,"name":"be quiet! Pure Base 500DX","brand":"be quiet!","price":45000,"supportedFormFactor":"ATX"},
+    {"id":9,"name":"Phanteks XT Pro","brand":"Phanteks","price":30000,"supportedFormFactor":"ATX"},
+    {"id":10,"name":"Cooler Master TD500 Mesh V2","brand":"Cooler Master","price":45000,"supportedFormFactor":"ATX"}
+  ],
+  "cpuCoolers": [
+    {"id":1,"name":"DeepCool AK400","brand":"DeepCool","price":15000,"coolerType":"Air","supportedSockets":["AM5","LGA1700"]},
+    {"id":2,"name":"DeepCool AK620","brand":"DeepCool","price":25000,"coolerType":"Air","supportedSockets":["AM5","LGA1700"]},
+    {"id":3,"name":"be quiet! Pure Rock 2","brand":"be quiet!","price":17000,"coolerType":"Air","supportedSockets":["AM5","LGA1700"]},
+    {"id":4,"name":"be quiet! Dark Rock 5","brand":"be quiet!","price":30000,"coolerType":"Air","supportedSockets":["AM5","LGA1700"]},
+    {"id":5,"name":"Noctua NH-U12S redux","brand":"Noctua","price":22000,"coolerType":"Air","supportedSockets":["AM5","LGA1700"]},
+    {"id":6,"name":"Noctua NH-D15 G2","brand":"Noctua","price":55000,"coolerType":"Air","supportedSockets":["AM5","LGA1700"]},
+    {"id":7,"name":"Thermalright Peerless Assassin 120 SE","brand":"Thermalright","price":20000,"coolerType":"Air","supportedSockets":["AM5","LGA1700"]},
+    {"id":8,"name":"Thermalright Phantom Spirit 120 SE","brand":"Thermalright","price":22000,"coolerType":"Air","supportedSockets":["AM5","LGA1700"]},
+    {"id":9,"name":"Arctic Liquid Freezer III 240","brand":"Arctic","price":35000,"coolerType":"AIO","supportedSockets":["AM5","LGA1700"]},
+    {"id":10,"name":"Arctic Liquid Freezer III 360","brand":"Arctic","price":45000,"coolerType":"AIO","supportedSockets":["AM5","LGA1700"]}
   ]
 }
