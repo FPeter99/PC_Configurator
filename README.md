@@ -45,7 +45,7 @@ Nem kompatibilis alkatrészek kiválasztása esetén a program ezt jelzi a felha
 
 ## 5. A weboldal
 
-A weboldal felépítése és működése a készített [weboldalterv](url) alapján kerül kialakításra.
+A weboldal felépítése és működése a készített [weboldalterv](https://www.figma.com/design/nbJEPPbKfDxL4IYOh1aweC/Untitled?node-id=0-1&t=9VHe2VDgGE6AwOcR-1) alapján kerül kialakításra.
 
 A felület célja, hogy egyszerűen és átláthatóan lehessen kiválasztani az egyes PC-alkatrészeket, valamint meg lehessen tekinteni az összeállított számítógép adatait és várható árát.
 
