@@ -1,4 +1,4 @@
-const BASE_URL = "http://vm1.test:8888/api";
+const BASE_URL = "http://localhost:8888/api";
 
 export let parts = [];
 
