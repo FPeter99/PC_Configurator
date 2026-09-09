@@ -21,4 +21,6 @@ export async function getParts(partType) {
     if (!response.ok) {
         throw new Error(`Error while fetching: ${response.status}`);
     }
+
+     return await response.json();
 }

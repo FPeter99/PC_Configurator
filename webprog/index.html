@@ -1,16 +1,279 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="hu">
 <head>
-  <meta charset="UTF-8">
-  <link rel="icon" href="/favicon.ico">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CP Configurator</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PC Összeállító</title>
+<link rel="stylesheet" href="src/assets/app.css">
 </head>
-
 <body>
-  asdddd
-  <script type="module" src="/src/main.js"></script>
-</body>
 
+<header>
+  <button id="menu-toggle" aria-label="Menü megnyitása" aria-expanded="false">☰</button>
+  <h1>PC Összeállító</h1>
+  <p>Válassz alkatrészt kategóriánként.</p>
+</header>
+
+<div class="layout">
+  <nav id="cat-nav"></nav>
+
+  <main>
+    <h2 id="section-title"></h2>
+    <span id="section-count"></span>
+    <div class="cards" id="cards"></div>
+  </main>
+
+  <aside>
+    <h2>Konfiguráció</h2>
+    <div class="sub">Kiválasztott alkatrészek</div>
+    <div id="summary-list"></div>
+    <div class="total-row">
+      <span>Végösszeg</span>
+      <span class="amount" id="total-amount">0 Ft</span>
+    </div>
+  </aside>
+</div>
+
+
+<!-- templatek -->
+
+ <template id="processor-card-template">
+    <div class="card">
+        <h3 class="card-title"></h3>
+
+        <div class="specs">
+            <div class="row">
+                <span>Gyártó</span>
+                <span class="brand"></span>
+            </div>
+
+            <div class="row">
+                <span>Foglalat</span>
+                <span class="socket"></span>
+            </div>
+
+            <div class="row">
+                <span>Magok</span>
+                <span class="cores"></span>
+            </div>
+
+            <div class="row">
+                <span>Szálak</span>
+                <span class="threads"></span>
+            </div>
+
+            <div class="row">
+                <span>Alap órajel</span>
+                <span class="base-clock"></span>
+            </div>
+
+            <div class="row">
+                <span>Boost órajel</span>
+                <span class="boost-clock"></span>
+            </div>
+
+            <div class="row">
+                <span>TDP</span>
+                <span class="tdp"></span>
+            </div>
+        </div>
+
+        <div class="price"></div>
+    </div>
+</template>
+
+<template id="gpu-card-template">
+    <div class="card">
+        <h3 class="card-title"></h3>
+
+        <div class="specs">
+            <div class="row">
+                <span>Gyártó</span>
+                <span class="brand"></span>
+            </div>
+
+            <div class="row">
+                <span>Interfész</span>
+                <span class="interface"></span>
+            </div>
+
+            <div class="row">
+                <span>VRAM</span>
+                <span class="vram"></span>
+            </div>
+
+            <div class="row">
+                <span>Memória típusa</span>
+                <span class="memory-type"></span>
+            </div>
+
+            <div class="row">
+                <span>TDP</span>
+                <span class="tdp"></span>
+            </div>
+        </div>
+
+        <div class="price"></div>
+    </div>
+</template>
+
+<template id="motherboard-card-template">
+    <div class="card">
+        <h3 class="card-title"></h3>
+
+        <div class="specs">
+            <div class="row">
+                <span>Gyártó</span>
+                <span class="brand"></span>
+            </div>
+
+            <div class="row">
+                <span>CPU foglalat</span>
+                <span class="cpu-socket"></span>
+            </div>
+
+            <div class="row">
+                <span>RAM típusa</span>
+                <span class="ram-type"></span>
+            </div>
+
+            <div class="row">
+                <span>Formátum</span>
+                <span class="form-factor"></span>
+            </div>
+        </div>
+
+        <div class="price"></div>
+    </div>
+</template>
+
+<template id="ram-card-template">
+    <div class="card">
+        <h3 class="card-title"></h3>
+
+        <div class="specs">
+            <div class="row">
+                <span>Gyártó</span>
+                <span class="brand"></span>
+            </div>
+
+            <div class="row">
+                <span>RAM típusa</span>
+                <span class="ram-type"></span>
+            </div>
+
+            <div class="row">
+                <span>Kapacitás</span>
+                <span class="capacity"></span>
+            </div>
+
+            <div class="row">
+                <span>Sebesség</span>
+                <span class="speed"></span>
+            </div>
+        </div>
+
+        <div class="price"></div>
+    </div>
+</template>
+
+<template id="storage-card-template">
+    <div class="card">
+        <h3 class="card-title"></h3>
+
+        <div class="specs">
+            <div class="row">
+                <span>Gyártó</span>
+                <span class="brand"></span>
+            </div>
+
+            <div class="row">
+                <span>Típus</span>
+                <span class="storage-type"></span>
+            </div>
+
+            <div class="row">
+                <span>Interfész</span>
+                <span class="interface"></span>
+            </div>
+
+            <div class="row">
+                <span>Kapacitás</span>
+                <span class="capacity"></span>
+            </div>
+        </div>
+
+        <div class="price"></div>
+    </div>
+</template>
+
+<template id="power-supply-card-template">
+    <div class="card">
+        <h3 class="card-title"></h3>
+
+        <div class="specs">
+            <div class="row">
+                <span>Gyártó</span>
+                <span class="brand"></span>
+            </div>
+
+            <div class="row">
+                <span>Teljesítmény</span>
+                <span class="wattage"></span>
+            </div>
+
+            <div class="row">
+                <span>Hatásfok</span>
+                <span class="efficiency"></span>
+            </div>
+        </div>
+
+        <div class="price"></div>
+    </div>
+</template>
+
+<template id="case-card-template">
+    <div class="card">
+        <h3 class="card-title"></h3>
+
+        <div class="specs">
+            <div class="row">
+                <span>Gyártó</span>
+                <span class="brand"></span>
+            </div>
+
+            <div class="row">
+                <span>Támogatott formátum</span>
+                <span class="supported-form-factor"></span>
+            </div>
+        </div>
+
+        <div class="price"></div>
+    </div>
+</template>
+
+<template id="cpu-cooler-card-template">
+    <div class="card">
+        <h3 class="card-title"></h3>
+
+        <div class="specs">
+            <div class="row">
+                <span>Gyártó</span>
+                <span class="brand"></span>
+            </div>
+
+            <div class="row">
+                <span>Támogatott foglalat</span>
+                <span class="supported-sockets"></span>
+            </div>
+        </div>
+
+        <div class="price"></div>
+    </div>
+</template>
+
+
+
+<script type="module" src="src/main.js"></script>
+</body>
 </html>
