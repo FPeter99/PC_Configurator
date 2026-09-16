@@ -60,14 +60,6 @@ header p {
 }
 
 
-
-
-nav {
-  padding: 160px 0;
-  border-right: 1px solid var(--line);
-}
-
-
 aside {
   padding: 24px;
 
@@ -88,3 +80,45 @@ aside .sub {
   color: var(--text-faint);
   font-size: 12px;
 }
+
+nav{
+  padding: 25px 0px;
+}
+
+.nav-btn{
+  display:flex; 
+  align-items:center; 
+  gap:10px; 
+  width:100%; 
+  text-align:left;
+  padding:10px 20px; 
+  font-size:14px; 
+  font-weight:600; 
+  font-family:'Manrope', sans-serif;
+  border:none; 
+  border-left:2px solid transparent; 
+  background:none; 
+  cursor:pointer;
+  transition: color .15s, background-color .15s, border-color .15s;
+  color: #6E6C5F;
+}
+
+.nav-btn:hover{ 
+  color: #23241E; 
+  background-color:#2b2201; 
+}
+
+.nav-btn.active{ 
+  border-left-color:#8A6A2B; 
+  background-color:#EBE8DC; 
+  color: #23241E; 
+}
+
+.nav-btn .dot{
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  background-color: #A5A28F;
+}
+
