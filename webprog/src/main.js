@@ -3,6 +3,16 @@ import { getParts } from "./js/fetch";
 
 const cards = document.querySelector("#cards");
 
+const selected = {
+    processors: null,
+    gpus: null,
+    motherboards: null,
+    ram: null,
+    storage: null,
+    powerSupplies: null,
+    cases: null,
+    cpuCoolers: null
+};
 
 function createCard(part, partType) {
 
@@ -58,8 +68,8 @@ function createCard(part, partType) {
         card.querySelector(".socket").textContent = part.socket;
         card.querySelector(".cores").textContent = part.cores;
         card.querySelector(".threads").textContent = part.threads;
-        card.querySelector(".base-clock").textContent = `${part.base_clock} GHz`;
-        card.querySelector(".boost-clock").textContent = `${part.boost_clock} GHz`;
+        card.querySelector(".base-clock").textContent = `${part.baseClock} GHz`;
+        card.querySelector(".boost-clock").textContent = `${part.boostClock} GHz`;
         card.querySelector(".tdp").textContent = `${part.tdp} W`;
     }
 
@@ -131,9 +141,25 @@ function createCard(part, partType) {
             part.supported_socket;
     }
 
+    const cardElement = card.querySelector(".card");
+
+    if (selected[partType] === part) {
+        cardElement.classList.add("selected");
+    }
+
+
+    cardElement.addEventListener("click", () => {
+        selected[partType] = part;
+
+        cards.querySelectorAll(".card").forEach(c => {
+            c.classList.remove("selected");
+        });
+
+        cardElement.classList.add("selected");
+    });
 
     return card;
-}
+    }
 
 
 function displayCards(parts, partType) {
