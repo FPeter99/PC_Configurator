@@ -1,18 +1,12 @@
 @import "tailwindcss";
 
-@import "tailwindcss";
-
-/* ========================================
-   CSS VARIABLES
-   ======================================== */
-
 :root {
   --bg: #0F1319;
   --line: #262C36;
   --text: #E4E6EA;
   --text-dim: #8B92A0;
   --text-faint: #565D6B;
-
+  --accent:#E2A33D;
 
 }
 
@@ -120,5 +114,39 @@ nav{
   border-radius: 9999px;
   flex-shrink: 0;
   background-color: #A5A28F;
+}
+
+
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(210px,1fr));
+  gap:12px;
+}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:4px; padding:14px;
+  cursor:pointer;
+}
+
+.card.selected{
+  border-color:var(--accent);
+}
+.card h3{
+  margin:0 0 8px;
+  font-size:15px;
+}
+.card .row{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:var(--text-dim);
+  margin-bottom:3px;
+}
+.card .price{
+  margin-top:12px;
+  font-weight:600;
 }
 
