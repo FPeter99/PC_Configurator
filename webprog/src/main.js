@@ -143,12 +143,25 @@ function createCard(part, partType) {
 
     const cardElement = card.querySelector(".card");
 
-    if (selected[partType] === part) {
+    if (selected[partType]?.id === part.id) {
         cardElement.classList.add("selected");
     }
 
 
     cardElement.addEventListener("click", () => {
+        const navButton = document.querySelector(
+            `.nav-btn[data-part-type="${partType}"]`
+        );
+
+        const dot = navButton.querySelector(".dot");
+
+        if (selected[partType]?.id === part.id) {
+            selected[partType] = null;
+            cardElement.classList.remove("selected");
+            dot.classList.remove("selected");
+            return;
+        }
+
         selected[partType] = part;
 
         cards.querySelectorAll(".card").forEach(c => {
@@ -156,6 +169,7 @@ function createCard(part, partType) {
         });
 
         cardElement.classList.add("selected");
+        dot.classList.add("selected");
     });
 
     return card;
@@ -174,9 +188,24 @@ const processors = await getParts("processors");
 
 displayCards(processors, "processors");
 
-document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  });
+const navButtons = document.querySelectorAll(".nav-btn");
+
+navButtons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+
+        // aktív gomb frissítése
+        navButtons.forEach(b => {
+            b.classList.remove("active");
+        });
+        btn.classList.add("active");
+
+        // kiválasztott kategória lekérése
+        const partType = btn.dataset.partType;
+
+        // adatok lekérése az adott kategóriából
+        const parts = await getParts(partType);
+
+        // kártyák megjelenítése
+        displayCards(parts, partType);
+    });
 });

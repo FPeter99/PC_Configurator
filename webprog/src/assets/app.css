@@ -111,6 +111,11 @@ nav{
   background-color: var(--text);
 }
 
+.dot.selected {
+    background-color: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+}
+
 .cards{
   display:grid;
   grid-template-columns:repeat(auto-fill, minmax(210px,1fr));
