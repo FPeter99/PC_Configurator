@@ -2,6 +2,8 @@ import "@assets/app.css";
 import { getParts } from "./js/fetch";
 
 const cards = document.querySelector("#cards");
+const searchInput = document.querySelector("#search-input");
+const navButtons = document.querySelectorAll(".nav-btn");
 
 const selected = {
     processors: null,
@@ -184,11 +186,9 @@ function displayCards(parts, partType) {
 }
 
 
-const processors = await getParts("processors");
-
-displayCards(processors, "processors");
-
-const navButtons = document.querySelectorAll(".nav-btn");
+let currentParts = await getParts("processors");
+let currentPartType = "processors";
+displayCards(currentParts, currentPartType);
 
 navButtons.forEach(btn => {
     btn.addEventListener("click", async () => {
@@ -199,13 +199,26 @@ navButtons.forEach(btn => {
         });
         btn.classList.add("active");
 
+        searchInput.value = "";
+
         // kiválasztott kategória lekérése
-        const partType = btn.dataset.partType;
+        currentPartType = btn.dataset.partType;
 
         // adatok lekérése az adott kategóriából
-        const parts = await getParts(partType);
+        currentParts = await getParts(currentPartType);
 
         // kártyák megjelenítése
-        displayCards(parts, partType);
+        displayCards(currentParts, currentPartType);
     });
+});
+
+searchInput.addEventListener("input", () => {
+    const term = searchInput.value.toLowerCase();
+
+    const filtered = currentParts.filter(part =>
+        part.name.toLowerCase().includes(term) ||
+        part.brand.toLowerCase().includes(term)
+    );
+
+    displayCards(filtered, currentPartType);
 });
