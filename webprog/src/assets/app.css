@@ -147,3 +147,36 @@ nav{
   margin-top:12px;
   font-weight:600;
 }
+
+.section-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 16px 5px;
+}
+
+#search-input{
+  display:  block;
+  padding:  8px 12px 8px 32px;
+  background:  var(--bg);
+  border:  1px solid var(--line);
+  border-radius: 5px;
+  color:  var(--text);
+  font-size:13px;
+  transition: border-color .15s, background-color .15s;
+}
+ 
+#search-input::placeholder{
+  color: var(--text-faint);
+}
+ 
+#search-input:hover{
+  border-color: var(--text-faint);
+}
+ 
+#search-input:focus{
+  outline: none;
+  border-color: var(--accent);
+  background: #161b23;
+}
