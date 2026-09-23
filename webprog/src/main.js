@@ -31,12 +31,25 @@ const selected = {
 let currentCategory = "processors";
 let currentParts = [];
 
+function updateTotal() {
+    const total = Object.values(selected).reduce((sum, item) => {
+        return sum + (item ? Number(item.price) || 0 : 0);
+    }, 0);
+
+    const totalAmountElement = document.querySelector("#total-amount");
+    if (totalAmountElement) {
+        totalAmountElement.textContent = `${total} $`;
+    }
+}
+
 function renderSummary() {
     if (!summaryList) return;
 
     summaryList.innerHTML = "";
 
     CATEGORIES.forEach(cat => {
+        const item = selected[cat.key];
+
         const itemEl = document.createElement("div");
         itemEl.className = "summary-item";
         itemEl.dataset.partType = cat.key;
@@ -46,13 +59,35 @@ function renderSummary() {
         subEl.textContent = cat.name;
         itemEl.appendChild(subEl);
 
-        const statusEl = document.createElement("div");
-        statusEl.className = "summary-status";
-        statusEl.textContent = "nincs kiválasztva";
-        itemEl.appendChild(statusEl);
+        if (!item) {
+            const statusEl = document.createElement("div");
+            statusEl.className = "summary-status";
+            statusEl.textContent = "nincs kiválasztva";
+            itemEl.appendChild(statusEl);
+        } else {
+            const detailsEl = document.createElement("div");
+            detailsEl.className = "summary-details";
+
+            const nameEl = document.createElement("span");
+            nameEl.className = "part-name";
+            nameEl.textContent = item.name;
+
+            const priceEl = document.createElement("span");
+            priceEl.className = "part-price";
+            priceEl.textContent = `${item.price} $`;
+
+            detailsEl.appendChild(nameEl);
+            detailsEl.appendChild(priceEl);
+            itemEl.appendChild(detailsEl);
+        }
 
         summaryList.appendChild(itemEl);
     });
+}
+
+function updateUI() {
+    updateTotal();
+    renderSummary();
 }
 
 function createCard(part, partType) {
@@ -131,6 +166,7 @@ function createCard(part, partType) {
             selected[partType] = null;
             cardElement.classList.remove("selected");
             dot?.classList.remove("selected");
+            updateUI();
             return;
         }
 
@@ -139,6 +175,7 @@ function createCard(part, partType) {
         cards.querySelectorAll(".card").forEach(c => c.classList.remove("selected"));
         cardElement.classList.add("selected");
         dot?.classList.add("selected");
+        updateUI();
     });
 
     return cardFrag;
@@ -174,7 +211,7 @@ navButtons.forEach(btn => {
 
 (async function init() {
     try {
-        renderSummary();
+        updateUI();
         const processors = await getParts("processors");
         displayCards(processors, "processors");
     } catch (err) {
