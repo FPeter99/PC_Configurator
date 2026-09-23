@@ -51,10 +51,21 @@
 
   <main>
     <div class="section-header">
-        <h2 id="section-title"></h2>
-        <span id="section-count"></span>
-        <input type="text" id="search-input" 
-                class="search-input" placeholder="Keresés">
+        <div class="search-sort-row">
+            <input type="text" id="search-input" 
+                    class="search-input" placeholder="Keresés">
+
+            <select id="sort-select" class="sort-select">
+                <option value="default">Rendezés</option>
+                <option value="price-asc">Ár: alacsony → magas</option>
+                <option value="price-desc">Ár: magas → alacsony</option>
+            </select>
+        </div>
+
+        <div class="section-heading">
+            <h2 id="section-title"></h2>
+            <span id="section-count"></span>
+        </div>
     </div>
     <div class="cards" id="cards"></div>
   </main>
