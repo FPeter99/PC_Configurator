@@ -3,6 +3,7 @@ import { getParts } from "./js/fetch";
 
 const cards = document.querySelector("#cards");
 const searchInput = document.querySelector("#search-input");
+const sortSelect = document.querySelector("#sort-select");
 const navButtons = document.querySelectorAll(".nav-btn");
 
 const selected = {
@@ -175,7 +176,7 @@ function createCard(part, partType) {
     });
 
     return card;
-    }
+}
 
 
 function displayCards(parts, partType) {
@@ -188,11 +189,10 @@ function displayCards(parts, partType) {
 
 let currentParts = await getParts("processors");
 let currentPartType = "processors";
-displayCards(currentParts, currentPartType);
+render();
 
 navButtons.forEach(btn => {
     btn.addEventListener("click", async () => {
-
         // aktív gomb frissítése
         navButtons.forEach(b => {
             b.classList.remove("active");
@@ -200,6 +200,7 @@ navButtons.forEach(btn => {
         btn.classList.add("active");
 
         searchInput.value = "";
+        sortSelect.value = "default";
 
         // kiválasztott kategória lekérése
         currentPartType = btn.dataset.partType;
@@ -208,17 +209,31 @@ navButtons.forEach(btn => {
         currentParts = await getParts(currentPartType);
 
         // kártyák megjelenítése
-        displayCards(currentParts, currentPartType);
+        render();
     });
 });
 
-searchInput.addEventListener("input", () => {
+searchInput.addEventListener("input", render);
+
+function sortParts(parts, sortBy) {
+    const sorted = [...parts];
+
+    if (sortBy === "price-asc") sorted.sort((a, b) => a.price - b.price);
+    if (sortBy === "price-desc") sorted.sort((a, b) => b.price - a.price);
+
+    return sorted;
+}
+
+sortSelect.addEventListener("change", render);
+
+function render() {
     const term = searchInput.value.toLowerCase();
 
     const filtered = currentParts.filter(part =>
-        part.name.toLowerCase().includes(term) ||
-        part.brand.toLowerCase().includes(term)
+        part.name.toLowerCase().includes(term)
     );
 
-    displayCards(filtered, currentPartType);
-});
+    const sorted = sortParts(filtered, sortSelect.value);
+
+    displayCards(sorted, currentPartType);
+}
