@@ -94,5 +94,6 @@
     {"id":8,"name":"Thermalright Phantom Spirit 120 SE","brand":"Thermalright","price":59,"coolerType":"Air","supportedSockets":["AM5","LGA1700"]},
     {"id":9,"name":"Arctic Liquid Freezer III 240","brand":"Arctic","price":95,"coolerType":"AIO","supportedSockets":["AM5","LGA1700"]},
     {"id":10,"name":"Arctic Liquid Freezer III 360","brand":"Arctic","price":122,"coolerType":"AIO","supportedSockets":["AM5","LGA1700"]}
-  ]
+  ],
+  "configurations": []
 }
