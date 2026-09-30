@@ -1,5 +1,5 @@
 import "@assets/app.css";
-import { getParts } from "./js/fetch";
+import { getParts, postConfiguration } from "./js/fetch";
 
 const cards = document.querySelector("#cards");
 const searchInput = document.querySelector("#search-input");
@@ -10,9 +10,14 @@ const sectionTitle = document.querySelector("#section-title");
 const sectionCount = document.querySelector("#section-count");
 const menuToggle = document.querySelector("#menu-toggle");
 const catNav = document.querySelector("#cat-nav");
+<<<<<<< HEAD
 const summary = document.querySelector("#summary");
 const summaryToggle = document.querySelector("#summary-toggle");
 const barTotal = document.querySelector("#bar-total");
+=======
+const configNameInput = document.querySelector("#config-name");
+const saveConfigBtn = document.querySelector("#save-config-btn");
+>>>>>>> 55a40d0 (működő konfiguráció mentés alap)
 
 const CATEGORIES = [
     { key: "processors", name: "Processzor" },
@@ -365,6 +370,7 @@ function sortParts(parts, sortBy) {
     return sorted;
 }
 
+<<<<<<< HEAD
 function render() {
     const term = searchInput.value.toLowerCase();
 
@@ -397,6 +403,28 @@ summaryToggle.addEventListener("click", () => {
 });
 
 
+=======
+if (saveConfigBtn) {
+    saveConfigBtn.addEventListener("click", async () => {
+        const name = configNameInput?.value?.trim() || "Névtelen konfiguráció";
+        const configData = {
+            name: name,
+            createdAt: new Date().toISOString(),
+            parts: { ...selected }
+        };
+
+        try {
+            await postConfiguration(configData);
+            alert("Konfiguráció sikeresen elmentve!");
+            if (configNameInput) configNameInput.value = "";
+        } catch (err) {
+            console.error("Hiba a mentés során:", err);
+            alert("Hiba történt a konfiguráció mentésekor!");
+        }
+    });
+}
+
+>>>>>>> 55a40d0 (működő konfiguráció mentés alap)
 (async function init() {
     try {
         currentParts = await getParts("processors");
