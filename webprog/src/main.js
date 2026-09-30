@@ -2,6 +2,9 @@ import "@assets/app.css";
 import { getParts } from "./js/fetch";
 
 const cards = document.querySelector("#cards");
+const searchInput = document.querySelector("#search-input");
+const sortSelect = document.querySelector("#sort-select");
+const navButtons = document.querySelectorAll(".nav-btn");
 const summaryList = document.querySelector("#summary-list");
 const sectionTitle = document.querySelector("#section-title");
 const sectionCount = document.querySelector("#section-count");
@@ -313,7 +316,6 @@ function createCard(part, partType) {
 }
 
 function displayCards(parts, partType) {
-    currentParts = parts;
     const categoryObj = CATEGORIES.find(c => c.key === partType);
     if (sectionTitle) {
         sectionTitle.textContent = categoryObj ? categoryObj.name : partType;
@@ -327,18 +329,50 @@ function displayCards(parts, partType) {
     );
 }
 
-const navButtons = document.querySelectorAll(".nav-btn");
 navButtons.forEach(btn => {
     btn.addEventListener("click", async () => {
+        // aktív gomb frissítése
         navButtons.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
 
-        const partType = btn.dataset.partType;
-        currentCategory = partType;
-        const parts = await getParts(partType);
-        displayCards(parts, partType);
+        searchInput.value = "";
+        sortSelect.value = "default";
+
+        // kiválasztott kategória lekérése
+        currentCategory = btn.dataset.partType;
+
+        // adatok lekérése az adott kategóriából
+        currentParts = await getParts(currentCategory);
+
+        // kártyák megjelenítése
+        render();
     });
 });
+
+searchInput.addEventListener("input", render);
+sortSelect.addEventListener("change", render);
+
+function sortParts(parts, sortBy) {
+    const sorted = [...parts];
+
+    if (sortBy === "price-asc") sorted.sort((a, b) => a.price - b.price);
+    if (sortBy === "price-desc") sorted.sort((a, b) => b.price - a.price);
+
+    return sorted;
+}
+
+function render() {
+    const term = searchInput.value.toLowerCase();
+
+    const filtered = currentParts.filter(part =>
+        part.name.toLowerCase().includes(term)
+    );
+
+    const sorted = sortParts(filtered, sortSelect.value);
+
+    displayCards(sorted, currentCategory);
+    updateUI();
+}
 
 if (menuToggle && catNav) {
     menuToggle.addEventListener("click", () => {
@@ -348,9 +382,8 @@ if (menuToggle && catNav) {
 
 (async function init() {
     try {
-        const processors = await getParts("processors");
-        displayCards(processors, "processors");
-        updateUI();
+        currentParts = await getParts("processors");
+        render();
     } catch (err) {
         console.error("Hiba:", err);
     }
