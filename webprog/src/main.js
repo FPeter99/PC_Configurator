@@ -1,5 +1,5 @@
 import "@assets/app.css";
-import { getParts } from "./js/fetch";
+import { getParts, postConfiguration } from "./js/fetch";
 
 const cards = document.querySelector("#cards");
 const summaryList = document.querySelector("#summary-list");
@@ -7,6 +7,8 @@ const sectionTitle = document.querySelector("#section-title");
 const sectionCount = document.querySelector("#section-count");
 const menuToggle = document.querySelector("#menu-toggle");
 const catNav = document.querySelector("#cat-nav");
+const configNameInput = document.querySelector("#config-name");
+const saveConfigBtn = document.querySelector("#save-config-btn");
 
 const CATEGORIES = [
     { key: "processors", name: "Processzor" },
@@ -343,6 +345,26 @@ navButtons.forEach(btn => {
 if (menuToggle && catNav) {
     menuToggle.addEventListener("click", () => {
         catNav.classList.toggle("open");
+    });
+}
+
+if (saveConfigBtn) {
+    saveConfigBtn.addEventListener("click", async () => {
+        const name = configNameInput?.value?.trim() || "Névtelen konfiguráció";
+        const configData = {
+            name: name,
+            createdAt: new Date().toISOString(),
+            parts: { ...selected }
+        };
+
+        try {
+            await postConfiguration(configData);
+            alert("Konfiguráció sikeresen elmentve!");
+            if (configNameInput) configNameInput.value = "";
+        } catch (err) {
+            console.error("Hiba a mentés során:", err);
+            alert("Hiba történt a konfiguráció mentésekor!");
+        }
     });
 }
 
