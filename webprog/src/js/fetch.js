@@ -24,3 +24,37 @@ export async function getParts(partType) {
 
      return await response.json();
 }
+
+export async function postConfiguration(configData) {
+    const response = await fetch(`${BASE_URL}/configurations`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(configData)
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error while saving configuration: ${response.status}`);
+    }
+
+    return await response.json();
+}
+
+export async function putConfiguration(id, configData) {
+    const response = await fetch(`${BASE_URL}/configurations/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(configData)
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error while updating configuration: ${response.status}`);
+    }
+
+    return await response.json();
+}
