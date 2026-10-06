@@ -9,7 +9,7 @@
 <body>
 
 <header>
-  <button id="menu-toggle" aria-label="Menü megnyitása" aria-expanded="false">☰</button>
+  <button id="menu-toggle">☰</button>
   <h1>PC Összeállító</h1>
   <p>Válassz alkatrészt kategóriánként.</p>
 </header>
@@ -17,35 +17,51 @@
 <div class="layout">
     <nav id="cat-nav">
         <button class="nav-btn active" data-part-type="processors">
-            <span class="dot"></span>Processzor
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg>
+            Processzor
+            <span class="dot"></span>
         </button>
 
         <button class="nav-btn" data-part-type="motherboards">
-            <span class="dot"></span>Alaplap
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="8" y="8" width="4" height="4"/><path d="M15 8v8M8 16h4"/></svg>
+            Alaplap
+            <span class="dot"></span>
         </button>
 
         <button class="nav-btn" data-part-type="ram">
-            <span class="dot"></span>Memória
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="1"/><path d="M7 8v8M11 8v8M15 8v8M6 16v3M10 16v3M14 16v3M18 16v3"/></svg>
+            Memória
+            <span class="dot"></span>
         </button>
 
         <button class="nav-btn" data-part-type="gpus">
-            <span class="dot"></span>Videokártya
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="1"/><circle cx="9" cy="12" r="2.5"/><circle cx="16" cy="12" r="2.5"/><path d="M6 17v2"/></svg>
+            Videokártya
+            <span class="dot"></span>
         </button>
 
         <button class="nav-btn" data-part-type="storage">
-            <span class="dot"></span>Tárhely
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 12h6M17 12h.01"/></svg>
+            Tárhely
+            <span class="dot"></span>
         </button>
 
         <button class="nav-btn" data-part-type="powerSupplies">
-            <span class="dot"></span>Tápegység
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>
+            Tápegység
+            <span class="dot"></span>
         </button>
 
         <button class="nav-btn" data-part-type="cases">
-            <span class="dot"></span>Ház
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 7h6M9 11h6M12 17h.01"/></svg>
+            Ház
+            <span class="dot"></span>
         </button>
 
         <button class="nav-btn" data-part-type="cpuCoolers">
-            <span class="dot"></span>CPU hűtő
+            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.5"/><path d="M12 10.5C12 7 13 5 15 5M13.5 12c3.5 0 5.5 1 5.5 3M12 13.5c0 3.5-1 5.5-3 5.5M10.5 12C7 12 5 11 5 9"/></svg>
+            CPU hűtő
+            <span class="dot"></span>
         </button>
     </nav>
 

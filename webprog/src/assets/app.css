@@ -33,12 +33,24 @@ header {
 
 #menu-toggle {
   display: none;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  place-items: center;
+  flex-shrink: 0;
   background: var(--panel);
   border: 1px solid var(--line);
   color: var(--text);
-  padding: 6px 12px;
-  border-radius: 4px;
+  font-size: 16px;
+  line-height: 1;
+  border-radius: 5px;
   cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+
+#menu-toggle.open {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 header h1 {
@@ -91,7 +103,23 @@ nav {
   color: var(--text);
 }
 
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav-btn.active .nav-icon {
+  color: var(--accent);
+}
+
 .nav-btn .dot {
+  margin-left: auto;
   width: 6px;
   height: 6px;
   border-radius: 9999px;
@@ -357,8 +385,22 @@ aside > .sub {
 }
 
 @media (max-width: 640px) {
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+    padding: 12px 14px;
+    flex-wrap: nowrap;
+  }
+  header h1 {
+    font-size: 16px;
+  }
+  header p {
+    display: none;
+  }
   #menu-toggle {
-    display: inline-block;
+    display: grid;
   }
   .layout {
     display: flex;
@@ -366,16 +408,30 @@ aside > .sub {
   }
   nav {
     display: none;
-    padding: 10px 0;
+    flex-direction: column;
+    padding: 6px 0;
+    border-right: none;
     border-bottom: 1px solid var(--line);
   }
   nav.open {
     display: flex;
+  }
+  .nav-btn {
+    padding: 11px 16px;
   }
   main {
     padding: 16px;
   }
   aside {
     padding: 16px;
+  }
+  .search-sort-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  #search-input,
+  .sort-select {
+    width: 100%;
   }
 }
