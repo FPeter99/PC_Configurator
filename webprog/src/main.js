@@ -374,11 +374,15 @@ function render() {
     updateUI();
 }
 
-if (menuToggle && catNav) {
-    menuToggle.addEventListener("click", () => {
-        catNav.classList.toggle("open");
-    });
-}
+menuToggle.addEventListener("click", () => {
+    const open = catNav.classList.toggle("open");
+    menuToggle.classList.toggle("open", open);
+    menuToggle.textContent = open ? "✕" : "☰";
+});
+
+catNav.addEventListener("click", () => {
+    if (catNav.classList.contains("open")) menuToggle.click();
+});
 
 (async function init() {
     try {
