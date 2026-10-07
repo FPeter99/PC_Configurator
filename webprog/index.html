@@ -85,9 +85,17 @@
     <div class="cards" id="cards"></div>
   </main>
 
-  <aside>
-    <h2>Konfiguráció</h2>
-    <div class="sub">Kiválasztott alkatrészek</div>
+  <aside id="summary">
+    <div id="summary-bar">
+      <div class="bar-total">
+        <span>Végösszeg</span>
+        <span id="bar-total">0 $</span>
+      </div>
+      <button id="summary-toggle">Összegzés ▲</button>
+    </div>
+
+    <h2 class="panel-title">Konfiguráció</h2>
+    <div class="sub panel-title">Kiválasztott alkatrészek</div>
     <div id="summary-list"></div>
     <div class="total-row">
       <span>Végösszeg</span>
