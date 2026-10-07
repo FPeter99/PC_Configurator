@@ -1,5 +1,5 @@
 import "@assets/app.css";
-import { getParts, postConfiguration } from "./js/fetch";
+import { getParts, postConfiguration, getConfigurations, deleteConfiguration } from "./js/fetch";
 
 const cards = document.querySelector("#cards");
 const searchInput = document.querySelector("#search-input");
@@ -10,14 +10,11 @@ const sectionTitle = document.querySelector("#section-title");
 const sectionCount = document.querySelector("#section-count");
 const menuToggle = document.querySelector("#menu-toggle");
 const catNav = document.querySelector("#cat-nav");
-<<<<<<< HEAD
 const summary = document.querySelector("#summary");
 const summaryToggle = document.querySelector("#summary-toggle");
 const barTotal = document.querySelector("#bar-total");
-=======
 const configNameInput = document.querySelector("#config-name");
 const saveConfigBtn = document.querySelector("#save-config-btn");
->>>>>>> 55a40d0 (működő konfiguráció mentés alap)
 
 const CATEGORIES = [
     { key: "processors", name: "Processzor" },
@@ -370,7 +367,6 @@ function sortParts(parts, sortBy) {
     return sorted;
 }
 
-<<<<<<< HEAD
 function render() {
     const term = searchInput.value.toLowerCase();
 
@@ -403,13 +399,11 @@ summaryToggle.addEventListener("click", () => {
 });
 
 
-=======
 if (saveConfigBtn) {
     saveConfigBtn.addEventListener("click", async () => {
         const name = configNameInput?.value?.trim() || "Névtelen konfiguráció";
         const configData = {
             name: name,
-            createdAt: new Date().toISOString(),
             parts: { ...selected }
         };
 
@@ -424,12 +418,84 @@ if (saveConfigBtn) {
     });
 }
 
->>>>>>> 55a40d0 (működő konfiguráció mentés alap)
-(async function init() {
+function createSavedConfigItem(savedConfiguration) {
+    const template = document.querySelector("#saved-config-template");
+    if (!template) return document.createElement("div");
+
+    const fragment = template.content.cloneNode(true);
+    const itemElement = fragment.querySelector(".saved-config-item");
+    const titleElement = fragment.querySelector(".config-name");
+    const partsListElement = fragment.querySelector(".config-parts-list");
+    const totalElement = fragment.querySelector(".config-total");
+    const deleteButton = fragment.querySelector(".delete-config-btn");
+
+    if (titleElement) {
+        titleElement.textContent = savedConfiguration.name || "Névtelen konfiguráció";
+    }
+
+    let totalPrice = 0;
+    for (const category of CATEGORIES) {
+        const selectedPart = savedConfiguration.parts ? savedConfiguration.parts[category.key] : null;
+        if (selectedPart && selectedPart.price) {
+            totalPrice += Number(selectedPart.price) || 0;
+        }
+
+        const listItem = document.createElement("li");
+        listItem.textContent = `${category.name}: ${selectedPart ? `${selectedPart.name} (${selectedPart.price} $)` : "Nincs kiválasztva"}`;
+        partsListElement?.appendChild(listItem);
+    }
+
+    if (totalElement) {
+        totalElement.textContent = `Végösszeg: ${totalPrice} $`;
+    }
+
+    deleteButton?.addEventListener("click", async () => {
+        try {
+            await deleteConfiguration(savedConfiguration.id);
+            await initSavedConfigs();
+        } catch (err) {
+            console.error("Hiba a törlés során:", err);
+            alert("Hiba történt a konfiguráció törlésekor!");
+        }
+    });
+
+    return itemElement;
+}
+
+async function initSavedConfigs() {
+    const container = document.querySelector("#saved-configs-list");
+    if (!container) return;
+
     try {
-        currentParts = await getParts("processors");
-        render();
+        const savedConfigurations = await getConfigurations();
+        if (!savedConfigurations || savedConfigurations.length === 0) {
+            container.innerHTML = `<p class="empty-configs">Nincsenek mentett konfigurációk.</p>`;
+            return;
+        }
+
+        const configCards = [];
+        for (const savedConfiguration of savedConfigurations) {
+            configCards.push(createSavedConfigItem(savedConfiguration));
+        }
+        container.replaceChildren(...configCards);
     } catch (err) {
-        console.error("Hiba:", err);
+        console.error("Hiba a mentett konfigurációk betöltésekor:", err);
+        container.innerHTML = `<p class="empty-configs">Hiba történt a konfigurációk betöltésekor.</p>`;
+    }
+}
+
+(async function init() {
+    if (cards) {
+        try {
+            currentParts = await getParts("processors");
+            render();
+        } catch (err) {
+            console.error("Hiba:", err);
+        }
+    }
+
+    const savedConfigsList = document.querySelector("#saved-configs-list");
+    if (savedConfigsList) {
+        await initSavedConfigs();
     }
 })();

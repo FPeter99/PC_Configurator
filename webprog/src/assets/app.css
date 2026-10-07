@@ -528,3 +528,68 @@ aside > .sub {
     align-items: stretch;
   }
 }
+
+.saved-configs-page {
+  padding: 24px;
+}
+
+.saved-configs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.saved-config-item {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.saved-config-item h3 {
+  margin: 0 0 10px 0;
+  color: var(--text);
+  font-size: 18px;
+}
+
+.config-parts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-parts-list li {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.config-total {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.delete-config-btn {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: #ef4444;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color .15s, border-color .15s;
+}
+
+.delete-config-btn:hover {
+  border-color: #ef4444;
+}
+
+.empty-configs {
+  color: var(--text-dim);
+  font-size: 14px;
+}

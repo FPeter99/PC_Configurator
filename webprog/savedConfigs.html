@@ -3,9 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mentett konfigurációk</title>
+    <title>Mentett Konfigurációk</title>
     <link rel="stylesheet" href="src/assets/app.css">
 </head>
 <body>
+
+<header>
+  <div class="header-nav">
+    <a href="index.html" class="header-btn">PC Összeállító</a>
+    <a href="savedConfigs.html" class="header-btn active">Mentett konfigurációk megtekintése</a>
+  </div>
+  <p>Elmentett konfigurációk listája.</p>
+</header>
+
+<main class="saved-configs-page">
+    <div id="saved-configs-list" class="saved-configs-list">
+        <p class="empty-configs">Konfigurációk betöltése...</p>
+    </div>
+</main>
+
+<template id="saved-config-template">
+    <div class="saved-config-item">
+        <h3 class="config-name"></h3>
+        <ul class="config-parts-list"></ul>
+        <div class="config-total"></div>
+        <button class="delete-config-btn">Konfiguráció törlése</button>
+    </div>
+</template>
+
+<script type="module" src="src/main.js"></script>
 </body>
 </html>
