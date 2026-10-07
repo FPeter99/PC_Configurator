@@ -1,5 +1,5 @@
 import "@assets/app.css";
-import { getParts, postConfiguration, getConfigurations, deleteConfiguration } from "./js/fetch";
+import { getParts, postConfiguration } from "./js/fetch";
 
 const cards = document.querySelector("#cards");
 const searchInput = document.querySelector("#search-input");
@@ -418,84 +418,11 @@ if (saveConfigBtn) {
     });
 }
 
-function createSavedConfigItem(savedConfiguration) {
-    const template = document.querySelector("#saved-config-template");
-    if (!template) return document.createElement("div");
-
-    const fragment = template.content.cloneNode(true);
-    const itemElement = fragment.querySelector(".saved-config-item");
-    const titleElement = fragment.querySelector(".config-name");
-    const partsListElement = fragment.querySelector(".config-parts-list");
-    const totalElement = fragment.querySelector(".config-total");
-    const deleteButton = fragment.querySelector(".delete-config-btn");
-
-    if (titleElement) {
-        titleElement.textContent = savedConfiguration.name || "Névtelen konfiguráció";
-    }
-
-    let totalPrice = 0;
-    for (const category of CATEGORIES) {
-        const selectedPart = savedConfiguration.parts ? savedConfiguration.parts[category.key] : null;
-        if (selectedPart && selectedPart.price) {
-            totalPrice += Number(selectedPart.price) || 0;
-        }
-
-        const listItem = document.createElement("li");
-        listItem.textContent = `${category.name}: ${selectedPart ? `${selectedPart.name} (${selectedPart.price} $)` : "Nincs kiválasztva"}`;
-        partsListElement?.appendChild(listItem);
-    }
-
-    if (totalElement) {
-        totalElement.textContent = `Végösszeg: ${totalPrice} $`;
-    }
-
-    deleteButton?.addEventListener("click", async () => {
-        try {
-            await deleteConfiguration(savedConfiguration.id);
-            await initSavedConfigs();
-        } catch (err) {
-            console.error("Hiba a törlés során:", err);
-            alert("Hiba történt a konfiguráció törlésekor!");
-        }
-    });
-
-    return itemElement;
-}
-
-async function initSavedConfigs() {
-    const container = document.querySelector("#saved-configs-list");
-    if (!container) return;
-
-    try {
-        const savedConfigurations = await getConfigurations();
-        if (!savedConfigurations || savedConfigurations.length === 0) {
-            container.innerHTML = `<p class="empty-configs">Nincsenek mentett konfigurációk.</p>`;
-            return;
-        }
-
-        const configCards = [];
-        for (const savedConfiguration of savedConfigurations) {
-            configCards.push(createSavedConfigItem(savedConfiguration));
-        }
-        container.replaceChildren(...configCards);
-    } catch (err) {
-        console.error("Hiba a mentett konfigurációk betöltésekor:", err);
-        container.innerHTML = `<p class="empty-configs">Hiba történt a konfigurációk betöltésekor.</p>`;
-    }
-}
-
 (async function init() {
-    if (cards) {
-        try {
-            currentParts = await getParts("processors");
-            render();
-        } catch (err) {
-            console.error("Hiba:", err);
-        }
-    }
-
-    const savedConfigsList = document.querySelector("#saved-configs-list");
-    if (savedConfigsList) {
-        await initSavedConfigs();
+    try {
+        currentParts = await getParts("processors");
+        render();
+    } catch (err) {
+        console.error("Hiba:", err);
     }
 })();
