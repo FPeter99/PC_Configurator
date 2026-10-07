@@ -56,9 +56,34 @@ header {
   color: var(--accent);
 }
 
-header h1 {
-  margin: 0;
-  font-size: 24px;
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.header-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-dim);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.header-btn:hover {
+  border-color: var(--accent);
+}
+
+.header-btn.active {
+  background-color: var(--dark-accent);
+  color: var(--text);
 }
 
 header p {
