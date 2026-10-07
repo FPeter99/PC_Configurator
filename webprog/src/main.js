@@ -10,6 +10,9 @@ const sectionTitle = document.querySelector("#section-title");
 const sectionCount = document.querySelector("#section-count");
 const menuToggle = document.querySelector("#menu-toggle");
 const catNav = document.querySelector("#cat-nav");
+const summary = document.querySelector("#summary");
+const summaryToggle = document.querySelector("#summary-toggle");
+const barTotal = document.querySelector("#bar-total");
 
 const CATEGORIES = [
     { key: "processors", name: "Processzor" },
@@ -133,6 +136,7 @@ function updateTotal() {
     if (totalAmountElement) {
         totalAmountElement.textContent = `${total} $`;
     }
+    barTotal.textContent = `${total} $`;
 }
 
 function renderSummary(compat) {
@@ -383,6 +387,15 @@ menuToggle.addEventListener("click", () => {
 catNav.addEventListener("click", () => {
     if (catNav.classList.contains("open")) menuToggle.click();
 });
+
+summaryToggle.addEventListener("click", () => {
+    const open = summary.classList.toggle("open");
+    document.body.classList.toggle("panel-open", open);
+    summaryToggle.textContent = open ? "Összegzés ▼" : "Összegzés ▲";
+
+    if (open && catNav.classList.contains("open")) menuToggle.click();
+});
+
 
 (async function init() {
     try {
