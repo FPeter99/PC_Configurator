@@ -35,7 +35,8 @@ function createSavedConfigItem(savedConfiguration) {
         }
 
         const listItem = document.createElement("li");
-        listItem.textContent = `${category.name}: ${selectedPart ? `${selectedPart.name} (${selectedPart.price} $)` : "Nincs kiválasztva"}`;
+        const partText = selectedPart ? `${selectedPart.name} (${selectedPart.price} $)` : "Nincs kiválasztva";
+        listItem.innerHTML = `<span class="part-category">${category.name}:</span> <span class="part-value">${partText}</span>`;
         partsListElement?.appendChild(listItem);
     }
 

@@ -546,82 +546,119 @@ aside > .sub {
 }
 
 .saved-configs-page {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 24px;
 }
 
 .saved-configs-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 16px;
 }
 
 .saved-config-item {
   background: var(--panel);
-  border: 1px solid var(--line);
-  padding: 16px;
-  border-radius: 4px;
+  border: none;
+  padding: 18px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
 }
 
 .saved-config-item h3 {
-  margin: 0 0 10px 0;
+  margin: 0 0 12px 0;
   color: var(--text);
-  font-size: 18px;
+  font-size: 16px;
+  font-weight: 600;
+  padding-bottom: 4px;
 }
 
 .config-parts-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 12px 0;
+  margin: 0 0 14px 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  flex-grow: 1;
 }
 
 .config-parts-list li {
-  font-size: 14px;
-  color: var(--text);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.config-parts-list .part-category {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.config-parts-list .part-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
 }
 
 .config-total {
   font-size: 15px;
   font-weight: 600;
   color: var(--accent);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  padding-top: 10px;
 }
 
-.delete-config-btn {
-  background: var(--bg);
-  border: 1px solid var(--line);
-  color: #ef4444;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  transition: background-color .15s, border-color .15s;
-}
-
-.delete-config-btn:hover {
-  border-color: #ef4444;
+.saved-config-item button {
+  margin-right: 8px;
+  margin-top: 4px;
 }
 
 .load-config-btn {
   background: var(--bg);
-  border: 1px solid var(--line);
-  color: #22c55e;
-  padding: 6px 12px;
+  border: none;
+  color: var(--text);
+  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
+  font-family: inherit;
   font-size: 13px;
-  font-weight: 500;
-  transition: background-color .15s, border-color .15s;
+  transition: background-color .15s, color .15s;
 }
 
 .load-config-btn:hover {
-  border-color: #22c55e;
+  background: #1e3a29;
+  color: #22c55e;
+}
+
+.delete-config-btn {
+  background: var(--bg);
+  border: none;
+  color: var(--text-dim);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  transition: background-color .15s, color .15s;
+}
+
+.delete-config-btn:hover {
+  background: #381c1c;
+  color: #ef4444;
 }
 
 .empty-configs {
   color: var(--text-dim);
   font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .saved-configs-page {
+    padding: 16px;
+  }
+
+  .saved-configs-list {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
