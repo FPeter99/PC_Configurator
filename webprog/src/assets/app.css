@@ -353,6 +353,22 @@ aside > .sub {
   color: var(--accent);
 }
 
+#save-config-btn {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  transition: border-color .15s;
+}
+
+#save-config-btn:hover {
+  border-color: var(--accent);
+}
+
 .summary-item {
   background: var(--panel);
   border: 1px solid var(--line);

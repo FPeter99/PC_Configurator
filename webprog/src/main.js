@@ -416,12 +416,14 @@ if (saveConfigBtn) {
             } else {
                 await postConfiguration(configData);
             }
-
-            alert("Konfiguráció sikeresen elmentve!");
             if (configNameInput) configNameInput.value = "";
+            const originalText = saveConfigBtn.textContent;
+            saveConfigBtn.textContent = "Mentve! ✓";
+            setTimeout(() => {
+                saveConfigBtn.textContent = originalText;
+            }, 2000);
         } catch (err) {
             console.error("Hiba a mentés során:", err);
-            alert("Hiba történt a konfiguráció mentésekor!");
         }
     });
 }
