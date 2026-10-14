@@ -72,6 +72,19 @@ export async function getConfigurations() {
     return await response.json();
 }
 
+export async function getConfiguration(id) {
+    const response = await fetch(`${BASE_URL}/configurations/${id}`, {
+        method: "GET",
+        headers: { "Accept": "application/json" }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error while fetching configuration: ${response.status}`);
+    }
+
+    return await response.json();
+}
+
 export async function deleteConfiguration(id) {
     const response = await fetch(`${BASE_URL}/configurations/${id}`, {
         method: "DELETE",

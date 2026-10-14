@@ -1,5 +1,5 @@
 import "@assets/app.css";
-import { getParts, postConfiguration } from "./js/fetch";
+import { getParts, getConfigurations, postConfiguration, putConfiguration, getConfiguration } from "./js/fetch";
 
 const cards = document.querySelector("#cards");
 const searchInput = document.querySelector("#search-input");
@@ -408,7 +408,15 @@ if (saveConfigBtn) {
         };
 
         try {
-            await postConfiguration(configData);
+            const configurations = await getConfigurations();
+            const existing = configurations.find(config => config.name === name);
+
+            if (existing) {
+                await putConfiguration(existing.id, configData);
+            } else {
+                await postConfiguration(configData);
+            }
+
             alert("Konfiguráció sikeresen elmentve!");
             if (configNameInput) configNameInput.value = "";
         } catch (err) {
@@ -418,8 +426,24 @@ if (saveConfigBtn) {
     });
 }
 
+async function loadSavedConfigFromUrl() {
+    const configId = new URLSearchParams(window.location.search).get("load");
+    if (!configId) return;
+
+    const savedConfiguration = await getConfiguration(configId);
+
+    for (const category of CATEGORIES) {
+        selected[category.key] = savedConfiguration.parts?.[category.key] ?? null;
+    }
+
+    if (configNameInput) {
+        configNameInput.value = savedConfiguration.name || "";
+    }
+}
+
 (async function init() {
     try {
+        await loadSavedConfigFromUrl();
         currentParts = await getParts("processors");
         render();
     } catch (err) {

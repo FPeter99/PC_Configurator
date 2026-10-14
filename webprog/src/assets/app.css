@@ -589,6 +589,22 @@ aside > .sub {
   border-color: #ef4444;
 }
 
+.load-config-btn {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: #22c55e;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color .15s, border-color .15s;
+}
+
+.load-config-btn:hover {
+  border-color: #22c55e;
+}
+
 .empty-configs {
   color: var(--text-dim);
   font-size: 14px;

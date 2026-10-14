@@ -21,6 +21,7 @@ function createSavedConfigItem(savedConfiguration) {
     const partsListElement = fragment.querySelector(".config-parts-list");
     const totalElement = fragment.querySelector(".config-total");
     const deleteButton = fragment.querySelector(".delete-config-btn");
+    const loadButton = fragment.querySelector(".load-config-btn");
 
     if (titleElement) {
         titleElement.textContent = savedConfiguration.name || "Névtelen konfiguráció";
@@ -41,6 +42,10 @@ function createSavedConfigItem(savedConfiguration) {
     if (totalElement) {
         totalElement.textContent = `Végösszeg: ${totalPrice} $`;
     }
+
+    loadButton?.addEventListener("click", () => {
+        window.location.href = `index.html?load=${savedConfiguration.id}`;
+    });
 
     deleteButton?.addEventListener("click", async () => {
         try {
