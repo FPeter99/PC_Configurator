@@ -32,6 +32,15 @@
     </div>
 </template>
 
+<dialog id="delete-modal">
+    <form id="delete-form">
+        <h2>Konfiguráció törlése</h2>
+        <p>Biztosan törölni szeretnéd a(z) <strong id="delete-config-name"></strong> konfigurációt?</p>
+        <button type="button" id="cancel-delete-btn">Mégse</button>
+        <button type="submit" id="submit-delete-btn">Törlés</button>
+    </form>
+</dialog>
+
 <script type="module" src="src/saved.js"></script>
 </body>
 </html>

@@ -11,6 +11,11 @@ const CATEGORIES = [
     { key: "cpuCoolers", name: "CPU hűtő" }
 ];
 
+const deleteDialogEl = document.querySelector("#delete-modal");
+const deleteFormEl = document.querySelector("#delete-form");
+const deleteConfigNameEl = document.querySelector("#delete-config-name");
+const cancelDeleteBtnEl = document.querySelector("#cancel-delete-btn");
+
 function createSavedConfigItem(savedConfiguration) {
     const template = document.querySelector("#saved-config-template");
     if (!template) return document.createElement("div");
@@ -24,7 +29,7 @@ function createSavedConfigItem(savedConfiguration) {
     const loadButton = fragment.querySelector(".load-config-btn");
 
     if (titleElement) {
-        titleElement.textContent = savedConfiguration.name || "Névtelen konfiguráció";
+        titleElement.textContent = savedConfiguration.name;
     }
 
     let totalPrice = 0;
@@ -48,14 +53,10 @@ function createSavedConfigItem(savedConfiguration) {
         window.location.href = `index.html?load=${savedConfiguration.id}`;
     });
 
-    deleteButton?.addEventListener("click", async () => {
-        try {
-            await deleteConfiguration(savedConfiguration.id);
-            await initSavedConfigs();
-        } catch (err) {
-            console.error("Hiba a törlés során:", err);
-            alert("Hiba történt a konfiguráció törlésekor!");
-        }
+    deleteButton?.addEventListener("click", () => {
+        deleteDialogEl.dataset.id = savedConfiguration.id;
+        deleteConfigNameEl.textContent = savedConfiguration.name;
+        deleteDialogEl.showModal();
     });
 
     return itemElement;
@@ -82,5 +83,16 @@ async function initSavedConfigs() {
         container.innerHTML = `<p class="empty-configs">Hiba történt a konfigurációk betöltésekor.</p>`;
     }
 }
+
+deleteFormEl?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await deleteConfiguration(deleteDialogEl.dataset.id);
+    deleteDialogEl.close();
+    await initSavedConfigs();
+});
+
+cancelDeleteBtnEl?.addEventListener("click", () => {
+    deleteDialogEl.close();
+});
 
 initSavedConfigs();
