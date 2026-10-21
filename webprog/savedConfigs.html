@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentett Konfigurációk</title>
+    <link rel="stylesheet" href="src/assets/app.css">
+</head>
+<body>
+
+<header>
+  <div class="header-nav">
+    <a href="index.html" class="header-btn">PC Összeállító</a>
+    <a href="savedConfigs.html" class="header-btn active">Mentett konfigurációk megtekintése</a>
+  </div>
+  <p>Elmentett konfigurációk listája.</p>
+</header>
+
+<main class="saved-configs-page">
+    <div id="saved-configs-list" class="saved-configs-list">
+        <p class="empty-configs">Konfigurációk betöltése...</p>
+    </div>
+</main>
+
+<template id="saved-config-template">
+    <div class="saved-config-item">
+        <h3 class="config-name"></h3>
+        <ul class="config-parts-list"></ul>
+        <div class="config-total"></div>
+        <button class="load-config-btn">Betöltés</button>
+        <button class="delete-config-btn">Konfiguráció törlése</button>
+    </div>
+</template>
+
+<dialog id="delete-modal">
+    <form id="delete-form">
+        <h2>Konfiguráció törlése</h2>
+        <p>Biztosan törölni szeretnéd a(z) <strong id="delete-config-name"></strong> konfigurációt?</p>
+        <button type="button" id="cancel-delete-btn">Mégse</button>
+        <button type="submit" id="submit-delete-btn">Törlés</button>
+    </form>
+</dialog>
+
+<script type="module" src="src/saved.js"></script>
+</body>
+</html>
