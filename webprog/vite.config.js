@@ -12,7 +12,7 @@ export default defineConfig({
     host: true,
     port: 8080,
     strictPort: true,
-    allowedHosts: ["vm1.test", "vm2.test", "vm3.test", "vm4.test", "vm5.test", "vm6.test"]
+    allowedHosts: ["vm1.test", "vm2.test", "vm3.test", "vm4.test", "vm5.test", "vm6.test", "frontend.vm1.test"]
   },
   resolve: {
     alias: {
