@@ -22,3 +22,6 @@ down:
     -docker rm -f vite
     -docker rmi fp/json-server
     -docker rmi fp/vite
+
+test:
+    docker run --rm -v $(pwd):/e2e -w /e2e --network host --ipc=host -e DISPLAY="" cypress/included:13.17.0 run --spec "cypress/e2e/pc_configurator.cy.js"
