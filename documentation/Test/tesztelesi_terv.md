@@ -60,12 +60,9 @@ A PC konfigurátor app felhasználói felületének megfelelő megjelenésének 
 | F12 | Mentés azonos névvel | Kétszer mentünk el konfigurációt ugyanazon a néven, eltérő alkatrészekkel. | Nem jön létre duplikátum, a meglévő konfiguráció az új tartalommal felülíródik. |
 | F13 | Mentett konfiguráció betöltése | A mentett oldalon a „Betöltés" gombra kattintunk. | Az összeállító oldal megnyílik, a mentett alkatrészek kijelölve, a név a mezőben, az összegző és a végösszeg helyes. |
 | F14 | Mentett konfiguráció törlése | A „Konfiguráció törlése" gomb után a megerősítő ablakban először a „Mégse", majd a „Törlés" gombot választjuk. | „Mégse" esetén a konfiguráció megmarad. „Törlés" után eltűnik a listából, az utolsó törlése után megjelenik az üres állapot szövege. |
-| F15 | Hibás konfigurációazonosító | Megnyitjuk az `index.html?load=9999` címet. | Az alkalmazás nem fagy le: az alkatrészek betöltődnek, üres konfigurációval indul. *(A jelenlegi kód ezt valószínűleg nem teljesíti, lásd a megjegyzést.)* |
-| F16 | Hiba az API elérésekor | Leállított szerver mellett megnyitjuk az oldalt, váltunk kategóriát, mentünk és törlünk. | Az alkalmazás nem omlik össze, a felhasználó érthető visszajelzést kap. *(A jelenlegi kód csak a konzolra naplóz.)* |
 
 ---
 
 # Tesztkörnyezet
-- Indítás: `just` (json-server a 8888-as, Vite a 8080-as porton)
-- Böngészők: Chrome és Firefox (legfrissebb), mobilnézet a DevTools emulációjával (375×667)
+- Indítás: `just test` (json-server a 8888-as, Vite a 8080-as porton)
 - Adat: a `db.json` eredeti állapota, üres `configurations` tömb minden tesztkör előtt
