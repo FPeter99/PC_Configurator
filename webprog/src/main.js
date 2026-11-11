@@ -1,5 +1,5 @@
 import "@assets/app.css";
-import { getParts } from "./js/fetch";
+import { getParts, getConfigurations, postConfiguration, putConfiguration, getConfiguration } from "./js/fetch";
 
 const cards = document.querySelector("#cards");
 const searchInput = document.querySelector("#search-input");
@@ -13,6 +13,8 @@ const catNav = document.querySelector("#cat-nav");
 const summary = document.querySelector("#summary");
 const summaryToggle = document.querySelector("#summary-toggle");
 const barTotal = document.querySelector("#bar-total");
+const configNameInput = document.querySelector("#config-name");
+const saveConfigBtn = document.querySelector("#save-config-btn");
 
 const CATEGORIES = [
     { key: "processors", name: "Processzor" },
@@ -397,8 +399,53 @@ summaryToggle.addEventListener("click", () => {
 });
 
 
+if (saveConfigBtn) {
+    saveConfigBtn.addEventListener("click", async () => {
+        const name = configNameInput?.value?.trim() || "Névtelen konfiguráció";
+        const configData = {
+            name: name,
+            parts: { ...selected }
+        };
+
+        try {
+            const configurations = await getConfigurations();
+            const existing = configurations.find(config => config.name === name);
+
+            if (existing) {
+                await putConfiguration(existing.id, configData);
+            } else {
+                await postConfiguration(configData);
+            }
+            if (configNameInput) configNameInput.value = "";
+            const originalText = saveConfigBtn.textContent;
+            saveConfigBtn.textContent = "Mentve! ✓";
+            setTimeout(() => {
+                saveConfigBtn.textContent = originalText;
+            }, 2000);
+        } catch (err) {
+            console.error("Hiba a mentés során:", err);
+        }
+    });
+}
+
+async function loadSavedConfigFromUrl() {
+    const configId = new URLSearchParams(window.location.search).get("load");
+    if (!configId) return;
+
+    const savedConfiguration = await getConfiguration(configId);
+
+    for (const category of CATEGORIES) {
+        selected[category.key] = savedConfiguration.parts?.[category.key] ?? null;
+    }
+
+    if (configNameInput) {
+        configNameInput.value = savedConfiguration.name || "";
+    }
+}
+
 (async function init() {
     try {
+        await loadSavedConfigFromUrl();
         currentParts = await getParts("processors");
         render();
     } catch (err) {
