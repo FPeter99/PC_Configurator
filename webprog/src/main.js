@@ -13,6 +13,7 @@ const catNav = document.querySelector("#cat-nav");
 const summary = document.querySelector("#summary");
 const summaryToggle = document.querySelector("#summary-toggle");
 const barTotal = document.querySelector("#bar-total");
+const totalAmount = document.querySelector("#total-amount");
 const configNameInput = document.querySelector("#config-name");
 const saveConfigBtn = document.querySelector("#save-config-btn");
 
@@ -41,14 +42,17 @@ const selected = {
 let currentCategory = "processors";
 let currentParts = [];
 
+function addConflict(conflicts, message, ...categoryKeys) {
+    for (const key of categoryKeys) {
+        if (!conflicts[key]) {
+            conflicts[key] = [];
+        }
+        conflicts[key].push(message);
+    }
+}
+
 function checkCompatibility(selectedParts) {
     const conflicts = {};
-    const issues = [];
-
-    const addConflict = (key, msg) => {
-        if (!conflicts[key]) conflicts[key] = [];
-        conflicts[key].push(msg);
-    };
 
     const cpu = selectedParts.processors;
     const mb = selectedParts.motherboards;
@@ -59,109 +63,60 @@ function checkCompatibility(selectedParts) {
     const pcCase = selectedParts.cases;
     const cooler = selectedParts.cpuCoolers;
 
-    if (cpu && mb) {
-        const cpuSocket = cpu.socket;
-        const mbSocket = mb.cpuSocket || mb.socket;
-        if (cpuSocket && mbSocket && cpuSocket !== mbSocket) {
-            addConflict("processors", "Processzor <=> Alaplap");
-            addConflict("motherboards", "Processzor <=> Alaplap");
-            issues.push(`Processzor <=> Alaplap`);
-        }
+    if (cpu && mb && cpu.socket !== mb.cpuSocket) {
+        addConflict(conflicts, "Processzor <=> Alaplap", "processors", "motherboards");
     }
 
-    if (mb && ram) {
-        const mbRam = mb.ramType || mb.ram_type;
-        const ramType = ram.ramType || ram.ram_type;
-        if (mbRam && ramType && mbRam !== ramType) {
-            addConflict("motherboards", "Memória <=> Alaplap");
-            addConflict("ram", "Memória <=> Alaplap");
-            issues.push(`Memória <=> Alaplap`);
-        }
+    if (mb && ram && mb.ramType !== ram.ramType) {
+        addConflict(conflicts, "Memória <=> Alaplap", "motherboards", "ram");
     }
 
-    if (cpu && cooler) {
-        const cpuSocket = cpu.socket;
-        const supportedSockets = Array.isArray(cooler.supportedSockets)
-            ? cooler.supportedSockets
-            : (cooler.supportedSockets ? [cooler.supportedSockets] : (cooler.supported_socket ? [cooler.supported_socket] : []));
-        if (cpuSocket && supportedSockets.length > 0 && !supportedSockets.includes(cpuSocket)) {
-            addConflict("cpuCoolers", "CPU hűtő <=> Processzor");
-            addConflict("processors", "CPU hűtő <=> Processzor");
-            issues.push(`CPU hűtő <=> Processzor`);
-        }
+    if (cpu?.socket && cooler?.supportedSockets && !cooler.supportedSockets.includes(cpu.socket)) {
+        addConflict(conflicts, "CPU hűtő <=> Processzor", "cpuCoolers", "processors");
     }
 
-    if (mb && pcCase) {
-        const mbForm = mb.formFactor || mb.form_factor;
-        const caseForm = pcCase.supportedFormFactor || pcCase.supported_form_factor;
-        if (mbForm && caseForm && mbForm !== caseForm) {
-            addConflict("motherboards", "Ház <=> Alaplap");
-            addConflict("cases", "Ház <=> Alaplap");
-            issues.push(`Ház <=> Alaplap`);
-        }
+    if (mb && pcCase && mb.formFactor !== pcCase.supportedFormFactor) {
+        addConflict(conflicts, "Ház <=> Alaplap", "motherboards", "cases");
     }
 
-    if (mb && storage) {
-        const storageInterfaces = mb.storageInterfaces || [];
-        const storageIf = storage.interface;
-        if (storageIf && storageInterfaces.length > 0 && !storageInterfaces.includes(storageIf)) {
-            addConflict("storage", "Tárhely <=> Alaplap");
-            addConflict("motherboards", "Tárhely <=> Alaplap");
-            issues.push(`Tárhely <=> Alaplap`);
-        }
+    if (mb?.storageInterfaces && storage?.interface && !mb.storageInterfaces.includes(storage.interface)) {
+        addConflict(conflicts, "Tárhely <=> Alaplap", "motherboards", "storage");
     }
 
-    if (psu) {
-        const cpuTdp = Number(cpu?.tdp) || 0;
-        const gpuTdp = Number(gpu?.tdp) || 0;
-        const estimatedPower = cpuTdp + gpuTdp + 60;
-        const psuWattage = Number(psu.wattage) || 0;
-        if (psuWattage > 0 && estimatedPower > psuWattage) {
-            addConflict("powerSupplies", "Tápegység <=> Fogyasztás");
-            issues.push(`Tápegység <=> Fogyasztás`);
-        }
+    if (psu && (cpu?.tdp || 0) + (gpu?.tdp || 0) + 60 > psu.wattage) {
+        addConflict(conflicts, "Tápegység <=> Fogyasztás", "powerSupplies");
     }
 
-    return {
-        isCompatible: issues.length === 0,
-        conflicts,
-        issues
-    };
+    return conflicts;
 }
 
 function updateTotal() {
-    const total = Object.values(selected).reduce((sum, item) => {
-        return sum + (item ? Number(item.price) || 0 : 0);
+    const total = Object.values(selected).reduce((sum, part) => {
+        return sum + (part ? Number(part.price) || 0 : 0);
     }, 0);
 
-    const totalAmountElement = document.querySelector("#total-amount");
-    if (totalAmountElement) {
-        totalAmountElement.textContent = `${total} $`;
-    }
+    totalAmount.textContent = `${total} $`;
     barTotal.textContent = `${total} $`;
 }
 
-function renderSummary(compat) {
-    if (!summaryList) return;
-
+function renderSummary(conflicts) {
     summaryList.innerHTML = "";
 
-    CATEGORIES.forEach(cat => {
-        const item = selected[cat.key];
-        const hasConflict = Boolean(compat.conflicts[cat.key]);
-        const conflictMsgs = compat.conflicts[cat.key] || [];
+    CATEGORIES.forEach(category => {
+        const part = selected[category.key];
+        const messages = conflicts[category.key] || [];
 
         const itemEl = document.createElement("div");
-        itemEl.className = `summary-item ${item ? "selected" : ""} ${hasConflict ? "conflict" : ""}`;
-        itemEl.dataset.partType = cat.key;
+        itemEl.className = "summary-item";
+        itemEl.classList.toggle("conflict", messages.length > 0);
+        itemEl.dataset.partType = category.key;
 
         const subEl = document.createElement("div");
         subEl.className = "sub";
-        subEl.textContent = cat.name;
-
+        subEl.textContent = category.name;
         itemEl.appendChild(subEl);
 
-        if (!item) {
+        if (!part) {
             const statusEl = document.createElement("div");
             statusEl.className = "summary-status";
             statusEl.textContent = "nincs kiválasztva";
@@ -172,53 +127,47 @@ function renderSummary(compat) {
 
             const nameEl = document.createElement("span");
             nameEl.className = "part-name";
-            nameEl.textContent = item.name;
+            nameEl.textContent = part.name;
 
             const priceEl = document.createElement("span");
             priceEl.className = "part-price";
-            priceEl.textContent = `${item.price} $`;
+            priceEl.textContent = `${part.price} $`;
 
             detailsEl.appendChild(nameEl);
             detailsEl.appendChild(priceEl);
             itemEl.appendChild(detailsEl);
         }
 
-        if (hasConflict) {
-            conflictMsgs.forEach(msg => {
+        messages.forEach(message => {
                 const conflictEl = document.createElement("div");
                 conflictEl.className = "conflict-text";
-                conflictEl.textContent = msg;
+                conflictEl.textContent = message;
                 itemEl.appendChild(conflictEl);
-            });
-        }
+        });
 
         summaryList.appendChild(itemEl);
     });
 }
 
-function updateNavStatus(compat) {
-    document.querySelectorAll(".nav-btn").forEach(btn => {
+function updateNavStatus(conflicts) {
+    navButtons.forEach(btn => {
         const type = btn.dataset.partType;
-        const dot = btn.querySelector(".dot");
         const isSelected = Boolean(selected[type]);
-        const hasConflict = Boolean(compat.conflicts[type]);
+        const hasConflict = Boolean(conflicts[type]);
+        const dot = btn.querySelector(".dot");
 
-        if (dot) {
-            dot.classList.toggle("selected", isSelected);
-            dot.classList.toggle("conflict", isSelected && hasConflict);
-        }
-
+        dot.classList.toggle("selected", isSelected);
+        dot.classList.toggle("conflict", isSelected && hasConflict);
         btn.classList.toggle("active", type === currentCategory);
     });
 }
 
-function updateCardsBorder(compat) {
-    if (!cards) return;
+function updateCardsBorder(conflicts) {
+    const hasConflict = Boolean(conflicts[currentCategory]);
 
     cards.querySelectorAll(".card").forEach(cardEl => {
         const partId = Number(cardEl.dataset.partId);
         const isSelected = selected[currentCategory]?.id === partId;
-        const hasConflict = Boolean(compat.conflicts[currentCategory]);
 
         cardEl.classList.toggle("selected", isSelected);
         cardEl.classList.toggle("conflict", isSelected && hasConflict);
@@ -226,88 +175,29 @@ function updateCardsBorder(compat) {
 }
 
 function updateUI() {
+    const conflicts = checkCompatibility(selected);
     updateTotal();
-    const compat = checkCompatibility(selected);
-    renderSummary(compat);
-    updateNavStatus(compat);
-    updateCardsBorder(compat);
+    renderSummary(conflicts);
+    updateNavStatus(conflicts);
+    updateCardsBorder(conflicts);
 }
 
 function createCard(part, partType) {
-    let template;
-
-    if (partType === "processors") template = document.querySelector("#processor-card-template");
-    if (partType === "gpus") template = document.querySelector("#gpu-card-template");
-    if (partType === "motherboards") template = document.querySelector("#motherboard-card-template");
-    if (partType === "ram") template = document.querySelector("#ram-card-template");
-    if (partType === "storage") template = document.querySelector("#storage-card-template");
-    if (partType === "powerSupplies") template = document.querySelector("#power-supply-card-template");
-    if (partType === "cases") template = document.querySelector("#case-card-template");
-    if (partType === "cpuCoolers") template = document.querySelector("#cpu-cooler-card-template");
-
-    if (!template) return document.createElement("div");
-
+    const template = document.querySelector(`#${partType}-card-template`);
     const cardFrag = template.content.cloneNode(true);
     const cardElement = cardFrag.querySelector(".card");
+
     cardElement.dataset.partId = part.id;
-
     cardFrag.querySelector(".card-title").textContent = part.name;
-    cardFrag.querySelector(".price").textContent = `${part.price} $`;
 
-    if (partType === "processors") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".socket").textContent = part.socket || "";
-        cardFrag.querySelector(".cores").textContent = part.cores || "";
-        cardFrag.querySelector(".threads").textContent = part.threads || "";
-        cardFrag.querySelector(".base-clock").textContent = `${part.baseClock} GHz`;
-        cardFrag.querySelector(".boost-clock").textContent = `${part.boostClock} GHz`;
-        cardFrag.querySelector(".tdp").textContent = `${part.tdp} W`;
-    } else if (partType === "gpus") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".interface").textContent = part.interface || "";
-        cardFrag.querySelector(".vram").textContent = `${part.vram} GB`;
-        cardFrag.querySelector(".memory-type").textContent = part.memoryType || part.memory_type || "";
-        cardFrag.querySelector(".tdp").textContent = `${part.tdp} W`;
-    } else if (partType === "motherboards") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".cpu-socket").textContent = part.cpuSocket || part.socket || "";
-        cardFrag.querySelector(".ram-type").textContent = part.ramType || part.ram_type || "";
-        cardFrag.querySelector(".form-factor").textContent = part.formFactor || part.form_factor || "";
-    } else if (partType === "ram") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".ram-type").textContent = part.ramType || part.ram_type || "";
-        cardFrag.querySelector(".capacity").textContent = `${part.capacity} GB`;
-        cardFrag.querySelector(".speed").textContent = `${part.speed} MHz`;
-    } else if (partType === "storage") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".storage-type").textContent = part.storageType || part.storage_type || "";
-        cardFrag.querySelector(".interface").textContent = part.interface || "";
-        cardFrag.querySelector(".capacity").textContent = `${part.capacity} GB`;
-    } else if (partType === "powerSupplies") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".wattage").textContent = `${part.wattage} W`;
-        cardFrag.querySelector(".efficiency").textContent = part.efficiency || "";
-    } else if (partType === "cases") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".supported-form-factor").textContent = part.supportedFormFactor || part.supported_form_factor || "";
-    } else if (partType === "cpuCoolers") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        const sockets = Array.isArray(part.supportedSockets)
-            ? part.supportedSockets.join(", ")
-            : (part.supportedSockets || part.supported_socket || "");
-        cardFrag.querySelector(".supported-sockets").textContent = sockets;
-    }
-
-    const compat = checkCompatibility(selected);
-    const isSelected = selected[partType]?.id === part.id;
-    const hasConflict = Boolean(compat.conflicts[partType]);
-
-    if (isSelected) {
-        cardElement.classList.add("selected");
-        if (hasConflict) {
-            cardElement.classList.add("conflict");
+    for (const [field, value] of Object.entries(part)) {
+        const element = cardFrag.querySelector("." + field);
+        if (element) {
+            element.textContent = Array.isArray(value) ? value.join(", ") : value;
         }
     }
+
+    cardFrag.querySelector(".price").textContent = `${part.price} $`;
 
     cardElement.addEventListener("click", () => {
         if (selected[partType]?.id === part.id) {
@@ -322,41 +212,14 @@ function createCard(part, partType) {
 }
 
 function displayCards(parts, partType) {
-    const categoryObj = CATEGORIES.find(c => c.key === partType);
-    if (sectionTitle) {
-        sectionTitle.textContent = categoryObj ? categoryObj.name : partType;
-    }
-    if (sectionCount) {
-        sectionCount.textContent = `(${parts.length} alkatrész)`;
-    }
+    const category = CATEGORIES.find(c => c.key === partType);
+    sectionTitle.textContent = category.name;
+    sectionCount.textContent = `(${parts.length} alkatrész)`;
 
     cards.replaceChildren(
         ...parts.map(part => createCard(part, partType))
     );
 }
-
-navButtons.forEach(btn => {
-    btn.addEventListener("click", async () => {
-        // aktív gomb frissítése
-        navButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        searchInput.value = "";
-        sortSelect.value = "default";
-
-        // kiválasztott kategória lekérése
-        currentCategory = btn.dataset.partType;
-
-        // adatok lekérése az adott kategóriából
-        currentParts = await getParts(currentCategory);
-
-        // kártyák megjelenítése
-        render();
-    });
-});
-
-searchInput.addEventListener("input", render);
-sortSelect.addEventListener("change", render);
 
 function sortParts(parts, sortBy) {
     const sorted = [...parts];
@@ -380,6 +243,25 @@ function render() {
     updateUI();
 }
 
+navButtons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+        searchInput.value = "";
+        sortSelect.value = "default";
+
+        // kiválasztott kategória lekérése
+        currentCategory = btn.dataset.partType;
+
+        // adatok lekérése az adott kategóriából
+        currentParts = await getParts(currentCategory);
+
+        // kártyák megjelenítése
+        render();
+    });
+});
+
+searchInput.addEventListener("input", render);
+sortSelect.addEventListener("change", render);
+
 menuToggle.addEventListener("click", () => {
     const open = catNav.classList.toggle("open");
     menuToggle.classList.toggle("open", open);
@@ -398,35 +280,35 @@ summaryToggle.addEventListener("click", () => {
     if (open && catNav.classList.contains("open")) menuToggle.click();
 });
 
+const saveButtonText = saveConfigBtn.textContent;
 
-if (saveConfigBtn) {
-    saveConfigBtn.addEventListener("click", async () => {
-        const name = configNameInput?.value?.trim() || "Névtelen konfiguráció";
-        const configData = {
-            name: name,
-            parts: { ...selected }
-        };
+saveConfigBtn.addEventListener("click", async () => {
+    const name = configNameInput.value.trim() || "Névtelen konfiguráció";
+    const configData = {
+        name: name,
+        parts: { ...selected }
+    };
 
-        try {
-            const configurations = await getConfigurations();
-            const existing = configurations.find(config => config.name === name);
+    try {
+        const configurations = await getConfigurations();
+        const existing = configurations.find(config => config.name === name);
 
-            if (existing) {
-                await putConfiguration(existing.id, configData);
-            } else {
-                await postConfiguration(configData);
-            }
-            if (configNameInput) configNameInput.value = "";
-            const originalText = saveConfigBtn.textContent;
-            saveConfigBtn.textContent = "Mentve! ✓";
-            setTimeout(() => {
-                saveConfigBtn.textContent = originalText;
-            }, 2000);
-        } catch (err) {
-            console.error("Hiba a mentés során:", err);
+        if (existing) {
+            await putConfiguration(existing.id, configData);
+        } else {
+            await postConfiguration(configData);
         }
-    });
-}
+    } catch (err) {
+        console.error("Hiba a mentés során:", err);
+        return;
+    }
+
+    configNameInput.value = "";
+    saveConfigBtn.textContent = "Mentve! ✓";
+    setTimeout(() => {
+        saveConfigBtn.textContent = saveButtonText;
+    }, 2000);
+});
 
 async function loadSavedConfigFromUrl() {
     const configId = new URLSearchParams(window.location.search).get("load");
@@ -438,9 +320,7 @@ async function loadSavedConfigFromUrl() {
         selected[category.key] = savedConfiguration.parts?.[category.key] ?? null;
     }
 
-    if (configNameInput) {
-        configNameInput.value = savedConfiguration.name || "";
-    }
+    configNameInput.value = savedConfiguration.name || "";
 }
 
 (async function init() {
