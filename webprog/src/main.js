@@ -71,7 +71,7 @@ function checkCompatibility(selectedParts) {
         addConflict(conflicts, "Memória <=> Alaplap", "motherboards", "ram");
     }
 
-    if (cpu && cooler && !cooler.supportedSockets.includes(cpu.socket)) {
+    if (cpu?.socket && cooler?.supportedSockets && !cooler.supportedSockets.includes(cpu.socket)) {
         addConflict(conflicts, "CPU hűtő <=> Processzor", "cpuCoolers", "processors");
     }
 
@@ -79,7 +79,7 @@ function checkCompatibility(selectedParts) {
         addConflict(conflicts, "Ház <=> Alaplap", "motherboards", "cases");
     }
 
-    if (mb && storage && !mb.storageInterfaces.includes(storage.interface)) {
+    if (mb?.storageInterfaces && storage?.interface && !mb.storageInterfaces.includes(storage.interface)) {
         addConflict(conflicts, "Tárhely <=> Alaplap", "motherboards", "storage");
     }
 
