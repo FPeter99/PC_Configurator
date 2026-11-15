@@ -13,6 +13,7 @@ const catNav = document.querySelector("#cat-nav");
 const summary = document.querySelector("#summary");
 const summaryToggle = document.querySelector("#summary-toggle");
 const barTotal = document.querySelector("#bar-total");
+const totalAmount = document.querySelector("#total-amount");
 const configNameInput = document.querySelector("#config-name");
 const saveConfigBtn = document.querySelector("#save-config-btn");
 
@@ -90,38 +91,32 @@ function checkCompatibility(selectedParts) {
 }
 
 function updateTotal() {
-    const total = Object.values(selected).reduce((sum, item) => {
-        return sum + (item ? Number(item.price) || 0 : 0);
+    const total = Object.values(selected).reduce((sum, part) => {
+        return sum + (part ? Number(part.price) || 0 : 0);
     }, 0);
 
-    const totalAmountElement = document.querySelector("#total-amount");
-    if (totalAmountElement) {
-        totalAmountElement.textContent = `${total} $`;
-    }
+    totalAmount.textContent = `${total} $`;
     barTotal.textContent = `${total} $`;
 }
 
 function renderSummary(conflicts) {
-    if (!summaryList) return;
-
     summaryList.innerHTML = "";
 
-    CATEGORIES.forEach(cat => {
-        const item = selected[cat.key];
-        const hasConflict = Boolean(conflicts[cat.key]);
-        const conflictMsgs = conflicts[cat.key] || [];
+    CATEGORIES.forEach(category => {
+        const part = selected[category.key];
+        const messages = conflicts[category.key] || [];
 
         const itemEl = document.createElement("div");
-        itemEl.className = `summary-item ${item ? "selected" : ""} ${hasConflict ? "conflict" : ""}`;
-        itemEl.dataset.partType = cat.key;
+        itemEl.className = "summary-item";
+        itemEl.classList.toggle("conflict", messages.length > 0);
+        itemEl.dataset.partType = category.key;
 
         const subEl = document.createElement("div");
         subEl.className = "sub";
-        subEl.textContent = cat.name;
-
+        subEl.textContent = category.name;
         itemEl.appendChild(subEl);
 
-        if (!item) {
+        if (!part) {
             const statusEl = document.createElement("div");
             statusEl.className = "summary-status";
             statusEl.textContent = "nincs kiválasztva";
@@ -132,53 +127,47 @@ function renderSummary(conflicts) {
 
             const nameEl = document.createElement("span");
             nameEl.className = "part-name";
-            nameEl.textContent = item.name;
+            nameEl.textContent = part.name;
 
             const priceEl = document.createElement("span");
             priceEl.className = "part-price";
-            priceEl.textContent = `${item.price} $`;
+            priceEl.textContent = `${part.price} $`;
 
             detailsEl.appendChild(nameEl);
             detailsEl.appendChild(priceEl);
             itemEl.appendChild(detailsEl);
         }
 
-        if (hasConflict) {
-            conflictMsgs.forEach(msg => {
+        messages.forEach(message => {
                 const conflictEl = document.createElement("div");
                 conflictEl.className = "conflict-text";
-                conflictEl.textContent = msg;
+                conflictEl.textContent = message;
                 itemEl.appendChild(conflictEl);
-            });
-        }
+        });
 
         summaryList.appendChild(itemEl);
     });
 }
 
 function updateNavStatus(conflicts) {
-    document.querySelectorAll(".nav-btn").forEach(btn => {
+    navButtons.forEach(btn => {
         const type = btn.dataset.partType;
-        const dot = btn.querySelector(".dot");
         const isSelected = Boolean(selected[type]);
         const hasConflict = Boolean(conflicts[type]);
+        const dot = btn.querySelector(".dot");
 
-        if (dot) {
-            dot.classList.toggle("selected", isSelected);
-            dot.classList.toggle("conflict", isSelected && hasConflict);
-        }
-
+        dot.classList.toggle("selected", isSelected);
+        dot.classList.toggle("conflict", isSelected && hasConflict);
         btn.classList.toggle("active", type === currentCategory);
     });
 }
 
 function updateCardsBorder(conflicts) {
-    if (!cards) return;
+    const hasConflict = Boolean(conflicts[currentCategory]);
 
     cards.querySelectorAll(".card").forEach(cardEl => {
         const partId = Number(cardEl.dataset.partId);
         const isSelected = selected[currentCategory]?.id === partId;
-        const hasConflict = Boolean(conflicts[currentCategory]);
 
         cardEl.classList.toggle("selected", isSelected);
         cardEl.classList.toggle("conflict", isSelected && hasConflict);
@@ -186,8 +175,8 @@ function updateCardsBorder(conflicts) {
 }
 
 function updateUI() {
-    updateTotal();
     const conflicts = checkCompatibility(selected);
+    updateTotal();
     renderSummary(conflicts);
     updateNavStatus(conflicts);
     updateCardsBorder(conflicts);
@@ -197,7 +186,7 @@ function createCard(part, partType) {
     const template = document.querySelector(`#${partType}-card-template`);
     const cardFrag = template.content.cloneNode(true);
     const cardElement = cardFrag.querySelector(".card");
-    
+
     cardElement.dataset.partId = part.id;
     cardFrag.querySelector(".card-title").textContent = part.name;
 
@@ -223,41 +212,14 @@ function createCard(part, partType) {
 }
 
 function displayCards(parts, partType) {
-    const categoryObj = CATEGORIES.find(c => c.key === partType);
-    if (sectionTitle) {
-        sectionTitle.textContent = categoryObj ? categoryObj.name : partType;
-    }
-    if (sectionCount) {
-        sectionCount.textContent = `(${parts.length} alkatrész)`;
-    }
+    const category = CATEGORIES.find(c => c.key === partType);
+    sectionTitle.textContent = category.name;
+    sectionCount.textContent = `(${parts.length} alkatrész)`;
 
     cards.replaceChildren(
         ...parts.map(part => createCard(part, partType))
     );
 }
-
-navButtons.forEach(btn => {
-    btn.addEventListener("click", async () => {
-        // aktív gomb frissítése
-        navButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        searchInput.value = "";
-        sortSelect.value = "default";
-
-        // kiválasztott kategória lekérése
-        currentCategory = btn.dataset.partType;
-
-        // adatok lekérése az adott kategóriából
-        currentParts = await getParts(currentCategory);
-
-        // kártyák megjelenítése
-        render();
-    });
-});
-
-searchInput.addEventListener("input", render);
-sortSelect.addEventListener("change", render);
 
 function sortParts(parts, sortBy) {
     const sorted = [...parts];
@@ -281,6 +243,25 @@ function render() {
     updateUI();
 }
 
+navButtons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+        searchInput.value = "";
+        sortSelect.value = "default";
+
+        // kiválasztott kategória lekérése
+        currentCategory = btn.dataset.partType;
+
+        // adatok lekérése az adott kategóriából
+        currentParts = await getParts(currentCategory);
+
+        // kártyák megjelenítése
+        render();
+    });
+});
+
+searchInput.addEventListener("input", render);
+sortSelect.addEventListener("change", render);
+
 menuToggle.addEventListener("click", () => {
     const open = catNav.classList.toggle("open");
     menuToggle.classList.toggle("open", open);
@@ -299,35 +280,35 @@ summaryToggle.addEventListener("click", () => {
     if (open && catNav.classList.contains("open")) menuToggle.click();
 });
 
+const saveButtonText = saveConfigBtn.textContent;
 
-if (saveConfigBtn) {
-    saveConfigBtn.addEventListener("click", async () => {
-        const name = configNameInput?.value?.trim() || "Névtelen konfiguráció";
-        const configData = {
-            name: name,
-            parts: { ...selected }
-        };
+saveConfigBtn.addEventListener("click", async () => {
+    const name = configNameInput.value.trim() || "Névtelen konfiguráció";
+    const configData = {
+        name: name,
+        parts: { ...selected }
+    };
 
-        try {
-            const configurations = await getConfigurations();
-            const existing = configurations.find(config => config.name === name);
+    try {
+        const configurations = await getConfigurations();
+        const existing = configurations.find(config => config.name === name);
 
-            if (existing) {
-                await putConfiguration(existing.id, configData);
-            } else {
-                await postConfiguration(configData);
-            }
-            if (configNameInput) configNameInput.value = "";
-            const originalText = saveConfigBtn.textContent;
-            saveConfigBtn.textContent = "Mentve! ✓";
-            setTimeout(() => {
-                saveConfigBtn.textContent = originalText;
-            }, 2000);
-        } catch (err) {
-            console.error("Hiba a mentés során:", err);
+        if (existing) {
+            await putConfiguration(existing.id, configData);
+        } else {
+            await postConfiguration(configData);
         }
-    });
-}
+    } catch (err) {
+        console.error("Hiba a mentés során:", err);
+        return;
+    }
+
+    configNameInput.value = "";
+    saveConfigBtn.textContent = "Mentve! ✓";
+    setTimeout(() => {
+        saveConfigBtn.textContent = saveButtonText;
+    }, 2000);
+});
 
 async function loadSavedConfigFromUrl() {
     const configId = new URLSearchParams(window.location.search).get("load");
@@ -339,9 +320,7 @@ async function loadSavedConfigFromUrl() {
         selected[category.key] = savedConfiguration.parts?.[category.key] ?? null;
     }
 
-    if (configNameInput) {
-        configNameInput.value = savedConfiguration.name || "";
-    }
+    configNameInput.value = savedConfiguration.name || "";
 }
 
 (async function init() {
