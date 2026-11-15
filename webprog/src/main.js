@@ -41,14 +41,17 @@ const selected = {
 let currentCategory = "processors";
 let currentParts = [];
 
+function addConflict(conflicts, message, ...categoryKeys) {
+    for (const key of categoryKeys) {
+        if (!conflicts[key]) {
+            conflicts[key] = [];
+        }
+        conflicts[key].push(message);
+    }
+}
+
 function checkCompatibility(selectedParts) {
     const conflicts = {};
-    const issues = [];
-
-    const addConflict = (key, msg) => {
-        if (!conflicts[key]) conflicts[key] = [];
-        conflicts[key].push(msg);
-    };
 
     const cpu = selectedParts.processors;
     const mb = selectedParts.motherboards;
@@ -59,74 +62,31 @@ function checkCompatibility(selectedParts) {
     const pcCase = selectedParts.cases;
     const cooler = selectedParts.cpuCoolers;
 
-    if (cpu && mb) {
-        const cpuSocket = cpu.socket;
-        const mbSocket = mb.cpuSocket || mb.socket;
-        if (cpuSocket && mbSocket && cpuSocket !== mbSocket) {
-            addConflict("processors", "Processzor <=> Alaplap");
-            addConflict("motherboards", "Processzor <=> Alaplap");
-            issues.push(`Processzor <=> Alaplap`);
-        }
+    if (cpu && mb && cpu.socket !== mb.cpuSocket) {
+        addConflict(conflicts, "Processzor <=> Alaplap", "processors", "motherboards");
     }
 
-    if (mb && ram) {
-        const mbRam = mb.ramType || mb.ram_type;
-        const ramType = ram.ramType || ram.ram_type;
-        if (mbRam && ramType && mbRam !== ramType) {
-            addConflict("motherboards", "Memória <=> Alaplap");
-            addConflict("ram", "Memória <=> Alaplap");
-            issues.push(`Memória <=> Alaplap`);
-        }
+    if (mb && ram && mb.ramType !== ram.ramType) {
+        addConflict(conflicts, "Memória <=> Alaplap", "motherboards", "ram");
     }
 
-    if (cpu && cooler) {
-        const cpuSocket = cpu.socket;
-        const supportedSockets = Array.isArray(cooler.supportedSockets)
-            ? cooler.supportedSockets
-            : (cooler.supportedSockets ? [cooler.supportedSockets] : (cooler.supported_socket ? [cooler.supported_socket] : []));
-        if (cpuSocket && supportedSockets.length > 0 && !supportedSockets.includes(cpuSocket)) {
-            addConflict("cpuCoolers", "CPU hűtő <=> Processzor");
-            addConflict("processors", "CPU hűtő <=> Processzor");
-            issues.push(`CPU hűtő <=> Processzor`);
-        }
+    if (cpu && cooler && !cooler.supportedSockets.includes(cpu.socket)) {
+        addConflict(conflicts, "CPU hűtő <=> Processzor", "cpuCoolers", "processors");
     }
 
-    if (mb && pcCase) {
-        const mbForm = mb.formFactor || mb.form_factor;
-        const caseForm = pcCase.supportedFormFactor || pcCase.supported_form_factor;
-        if (mbForm && caseForm && mbForm !== caseForm) {
-            addConflict("motherboards", "Ház <=> Alaplap");
-            addConflict("cases", "Ház <=> Alaplap");
-            issues.push(`Ház <=> Alaplap`);
-        }
+    if (mb && pcCase && mb.formFactor !== pcCase.supportedFormFactor) {
+        addConflict(conflicts, "Ház <=> Alaplap", "motherboards", "cases");
     }
 
-    if (mb && storage) {
-        const storageInterfaces = mb.storageInterfaces || [];
-        const storageIf = storage.interface;
-        if (storageIf && storageInterfaces.length > 0 && !storageInterfaces.includes(storageIf)) {
-            addConflict("storage", "Tárhely <=> Alaplap");
-            addConflict("motherboards", "Tárhely <=> Alaplap");
-            issues.push(`Tárhely <=> Alaplap`);
-        }
+    if (mb && storage && !mb.storageInterfaces.includes(storage.interface)) {
+        addConflict(conflicts, "Tárhely <=> Alaplap", "motherboards", "storage");
     }
 
-    if (psu) {
-        const cpuTdp = Number(cpu?.tdp) || 0;
-        const gpuTdp = Number(gpu?.tdp) || 0;
-        const estimatedPower = cpuTdp + gpuTdp + 60;
-        const psuWattage = Number(psu.wattage) || 0;
-        if (psuWattage > 0 && estimatedPower > psuWattage) {
-            addConflict("powerSupplies", "Tápegység <=> Fogyasztás");
-            issues.push(`Tápegység <=> Fogyasztás`);
-        }
+    if (psu && (cpu?.tdp || 0) + (gpu?.tdp || 0) + 60 > psu.wattage) {
+        addConflict(conflicts, "Tápegység <=> Fogyasztás", "powerSupplies");
     }
 
-    return {
-        isCompatible: issues.length === 0,
-        conflicts,
-        issues
-    };
+    return conflicts;
 }
 
 function updateTotal() {
@@ -141,15 +101,15 @@ function updateTotal() {
     barTotal.textContent = `${total} $`;
 }
 
-function renderSummary(compat) {
+function renderSummary(conflicts) {
     if (!summaryList) return;
 
     summaryList.innerHTML = "";
 
     CATEGORIES.forEach(cat => {
         const item = selected[cat.key];
-        const hasConflict = Boolean(compat.conflicts[cat.key]);
-        const conflictMsgs = compat.conflicts[cat.key] || [];
+        const hasConflict = Boolean(conflicts[cat.key]);
+        const conflictMsgs = conflicts[cat.key] || [];
 
         const itemEl = document.createElement("div");
         itemEl.className = `summary-item ${item ? "selected" : ""} ${hasConflict ? "conflict" : ""}`;
@@ -196,12 +156,12 @@ function renderSummary(compat) {
     });
 }
 
-function updateNavStatus(compat) {
+function updateNavStatus(conflicts) {
     document.querySelectorAll(".nav-btn").forEach(btn => {
         const type = btn.dataset.partType;
         const dot = btn.querySelector(".dot");
         const isSelected = Boolean(selected[type]);
-        const hasConflict = Boolean(compat.conflicts[type]);
+        const hasConflict = Boolean(conflicts[type]);
 
         if (dot) {
             dot.classList.toggle("selected", isSelected);
@@ -212,13 +172,13 @@ function updateNavStatus(compat) {
     });
 }
 
-function updateCardsBorder(compat) {
+function updateCardsBorder(conflicts) {
     if (!cards) return;
 
     cards.querySelectorAll(".card").forEach(cardEl => {
         const partId = Number(cardEl.dataset.partId);
         const isSelected = selected[currentCategory]?.id === partId;
-        const hasConflict = Boolean(compat.conflicts[currentCategory]);
+        const hasConflict = Boolean(conflicts[currentCategory]);
 
         cardEl.classList.toggle("selected", isSelected);
         cardEl.classList.toggle("conflict", isSelected && hasConflict);
@@ -227,10 +187,10 @@ function updateCardsBorder(compat) {
 
 function updateUI() {
     updateTotal();
-    const compat = checkCompatibility(selected);
-    renderSummary(compat);
-    updateNavStatus(compat);
-    updateCardsBorder(compat);
+    const conflicts = checkCompatibility(selected);
+    renderSummary(conflicts);
+    updateNavStatus(conflicts);
+    updateCardsBorder(conflicts);
 }
 
 function createCard(part, partType) {
@@ -298,9 +258,9 @@ function createCard(part, partType) {
         cardFrag.querySelector(".supported-sockets").textContent = sockets;
     }
 
-    const compat = checkCompatibility(selected);
+    const conflicts = checkCompatibility(selected);
     const isSelected = selected[partType]?.id === part.id;
-    const hasConflict = Boolean(compat.conflicts[partType]);
+    const hasConflict = Boolean(conflicts[partType]);
 
     if (isSelected) {
         cardElement.classList.add("selected");
