@@ -194,80 +194,21 @@ function updateUI() {
 }
 
 function createCard(part, partType) {
-    let template;
-
-    if (partType === "processors") template = document.querySelector("#processor-card-template");
-    if (partType === "gpus") template = document.querySelector("#gpu-card-template");
-    if (partType === "motherboards") template = document.querySelector("#motherboard-card-template");
-    if (partType === "ram") template = document.querySelector("#ram-card-template");
-    if (partType === "storage") template = document.querySelector("#storage-card-template");
-    if (partType === "powerSupplies") template = document.querySelector("#power-supply-card-template");
-    if (partType === "cases") template = document.querySelector("#case-card-template");
-    if (partType === "cpuCoolers") template = document.querySelector("#cpu-cooler-card-template");
-
-    if (!template) return document.createElement("div");
-
+    const template = document.querySelector(`#${partType}-card-template`);
     const cardFrag = template.content.cloneNode(true);
     const cardElement = cardFrag.querySelector(".card");
+    
     cardElement.dataset.partId = part.id;
-
     cardFrag.querySelector(".card-title").textContent = part.name;
-    cardFrag.querySelector(".price").textContent = `${part.price} $`;
 
-    if (partType === "processors") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".socket").textContent = part.socket || "";
-        cardFrag.querySelector(".cores").textContent = part.cores || "";
-        cardFrag.querySelector(".threads").textContent = part.threads || "";
-        cardFrag.querySelector(".base-clock").textContent = `${part.baseClock} GHz`;
-        cardFrag.querySelector(".boost-clock").textContent = `${part.boostClock} GHz`;
-        cardFrag.querySelector(".tdp").textContent = `${part.tdp} W`;
-    } else if (partType === "gpus") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".interface").textContent = part.interface || "";
-        cardFrag.querySelector(".vram").textContent = `${part.vram} GB`;
-        cardFrag.querySelector(".memory-type").textContent = part.memoryType || part.memory_type || "";
-        cardFrag.querySelector(".tdp").textContent = `${part.tdp} W`;
-    } else if (partType === "motherboards") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".cpu-socket").textContent = part.cpuSocket || part.socket || "";
-        cardFrag.querySelector(".ram-type").textContent = part.ramType || part.ram_type || "";
-        cardFrag.querySelector(".form-factor").textContent = part.formFactor || part.form_factor || "";
-    } else if (partType === "ram") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".ram-type").textContent = part.ramType || part.ram_type || "";
-        cardFrag.querySelector(".capacity").textContent = `${part.capacity} GB`;
-        cardFrag.querySelector(".speed").textContent = `${part.speed} MHz`;
-    } else if (partType === "storage") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".storage-type").textContent = part.storageType || part.storage_type || "";
-        cardFrag.querySelector(".interface").textContent = part.interface || "";
-        cardFrag.querySelector(".capacity").textContent = `${part.capacity} GB`;
-    } else if (partType === "powerSupplies") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".wattage").textContent = `${part.wattage} W`;
-        cardFrag.querySelector(".efficiency").textContent = part.efficiency || "";
-    } else if (partType === "cases") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        cardFrag.querySelector(".supported-form-factor").textContent = part.supportedFormFactor || part.supported_form_factor || "";
-    } else if (partType === "cpuCoolers") {
-        cardFrag.querySelector(".brand").textContent = part.brand || "";
-        const sockets = Array.isArray(part.supportedSockets)
-            ? part.supportedSockets.join(", ")
-            : (part.supportedSockets || part.supported_socket || "");
-        cardFrag.querySelector(".supported-sockets").textContent = sockets;
-    }
-
-    const conflicts = checkCompatibility(selected);
-    const isSelected = selected[partType]?.id === part.id;
-    const hasConflict = Boolean(conflicts[partType]);
-
-    if (isSelected) {
-        cardElement.classList.add("selected");
-        if (hasConflict) {
-            cardElement.classList.add("conflict");
+    for (const [field, value] of Object.entries(part)) {
+        const element = cardFrag.querySelector("." + field);
+        if (element) {
+            element.textContent = Array.isArray(value) ? value.join(", ") : value;
         }
     }
+
+    cardFrag.querySelector(".price").textContent = `${part.price} $`;
 
     cardElement.addEventListener("click", () => {
         if (selected[partType]?.id === part.id) {
