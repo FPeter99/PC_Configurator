@@ -38,6 +38,7 @@ A fájl elején a szükséges HTML elemekre mutató konstansok találhatók.
 | `summary` | `#summary` | az összegző panel (`aside`) |
 | `summaryToggle` | `#summary-toggle` | az összegző panel nyitó gombja (mobil) |
 | `barTotal` | `#bar-total` | az alsó sáv végösszege (mobil) |
+| `totalAmount` | `#total-amount` | a végösszeg az oldalpanelben |
 | `configNameInput` | `#config-name` | a konfiguráció neve beviteli mező |
 | `saveConfigBtn` | `#save-config-btn` | a mentés gomb |
 
@@ -107,6 +108,29 @@ Az aktuális kategória lekért alkatrészei (a szűrés és rendezés előtti, 
 
 ## Metódusok
 
+### `addConflict(conflicts, message, ...categoryKeys)`
+
+Egy ütközés üzenetét rögzíti a megadott kategóriáknál. A `checkCompatibility()` használja.
+
+```javascript
+function addConflict(conflicts, message, ...categoryKeys) {
+    for (const key of categoryKeys) {
+        if (!conflicts[key]) {
+            conflicts[key] = [];
+        }
+        conflicts[key].push(message);
+    }
+}
+```
+
+#### Paraméterek
+
+* **`conflicts`**: az ütközéseket gyűjtő objektum (kategóriakulcs → üzenetek tömbje), a függvény ezt módosítja
+* **`message`**: az ütközés szövege
+* **`...categoryKeys`**: azok a kategóriák, amelyekhez az üzenetet hozzá kell adni (egy vagy több kulcs)
+
+---
+
 ### `checkCompatibility(selectedParts)`
 
 A kiválasztott alkatrészek kompatibilitását ellenőrzi.
@@ -114,23 +138,17 @@ A kiválasztott alkatrészek kompatibilitását ellenőrzi.
 ```javascript
 function checkCompatibility(selectedParts) {
     const conflicts = {};
-    const issues = [];
     // ... szabályok ...
-    return {
-        isCompatible: issues.length === 0,
-        conflicts,
-        issues
-    };
+    return conflicts;
 }
 ```
 
 ### Működési elv lépésről lépésre:
 
-1. **Segédfüggvény:** Az `addConflict(key, msg)` egy üzenetet ad hozzá az adott kategóriához a `conflicts` objektumban.
-2. **Alkatrészek kiolvasása:** A paraméterből kiveszi a `cpu`, `mb`, `ram`, `gpu`, `storage`, `psu`, `pcCase` és `cooler` értékeket.
-3. **Szabályok ellenőrzése:** Minden szabály csak akkor fut le, ha mindkét érintett alkatrész ki van választva és az összehasonlított mezők léteznek.
-4. **Ütközés rögzítése:** Hiba esetén mindkét érintett kategóriához bekerül az üzenet a `conflicts`-ba, az `issues` tömbbe pedig egyszer.
-5. **Eredmény visszaadása:** Az `isCompatible` akkor igaz, ha az `issues` üres.
+1. **Alkatrészek kiolvasása:** A paraméterből kiveszi a `cpu`, `mb`, `ram`, `gpu`, `storage`, `psu`, `pcCase` és `cooler` értékeket.
+2. **Szabályok ellenőrzése:** Minden szabály csak akkor fut le, ha az érintett alkatrészek ki vannak választva. A hiányzó értékeket az opcionális láncolás (`?.`) kezeli.
+3. **Ütközés rögzítése:** Hiba esetén az `addConflict()` mindkét érintett kategóriához felveszi az üzenetet a `conflicts` objektumba.
+4. **Eredmény visszaadása:** A függvény a `conflicts` objektumot adja vissza.
 
 #### A szabályok
 
@@ -145,7 +163,7 @@ function checkCompatibility(selectedParts) {
 
 A tápegység-szabálynál a 60 W a többi alkatrész (alaplap, memória, tárhely, ventilátorok) becsült fogyasztása. Ha a CPU vagy a GPU nincs kiválasztva, a TDP értéke 0-nak számít. Pontosan egyenlő érték (pl. 240 W és 240 W) még elfogadott.
 
-Néhány szabály a mezők régi (snake_case) nevét is elfogadja (`ram_type`, `form_factor`, `supported_socket`).
+A szabályok a `db.json` camelCase mezőneveit használják (`ramType`, `formFactor`, `supportedSockets`). A korábbi snake_case nevekre (`ram_type`, `form_factor`, `supported_socket`) nincs tartalék.
 
 #### Paraméterek
 
@@ -156,15 +174,13 @@ Néhány szabály a mezők régi (snake_case) nevét is elfogadja (`ram_type`, `
 
 ```javascript
 {
-    isCompatible: false,
-    conflicts: { processors: ["Processzor <=> Alaplap"], motherboards: ["Processzor <=> Alaplap"] },
-    issues: ["Processzor <=> Alaplap"]
+    processors: ["Processzor <=> Alaplap"],
+    motherboards: ["Processzor <=> Alaplap"]
 }
 ```
 
-* **`isCompatible`**: igaz, ha nincs ütközés
-* **`conflicts`**: kategóriánként az üzenetek tömbje
-* **`issues`**: az ütközések egyszeri listája
+* Kulcs: a kategória kulcsa, érték: az ott talált ütközések üzeneteinek tömbje.
+* Ha nincs ütközés, az eredmény üres objektum (`{}`). Egy kategória ütközését a `Boolean(conflicts[kulcs])` kifejezéssel lehet ellenőrizni.
 
 ---
 
@@ -174,14 +190,11 @@ Kiszámolja és megjeleníti a végösszeget.
 
 ```javascript
 function updateTotal() {
-    const total = Object.values(selected).reduce((sum, item) => {
-        return sum + (item ? Number(item.price) || 0 : 0);
+    const total = Object.values(selected).reduce((sum, part) => {
+        return sum + (part ? Number(part.price) || 0 : 0);
     }, 0);
 
-    const totalAmountElement = document.querySelector("#total-amount");
-    if (totalAmountElement) {
-        totalAmountElement.textContent = `${total} $`;
-    }
+    totalAmount.textContent = `${total} $`;
     barTotal.textContent = `${total} $`;
 }
 ```
@@ -189,8 +202,8 @@ function updateTotal() {
 ### Működési elv lépésről lépésre:
 
 1. **Összeadás:** A `selected` értékein végigmegy, és összeadja a kiválasztott alkatrészek árát. A nem kiválasztott (`null`) tétel 0-nak számít.
-2. **Megjelenítés az oldalpanelen:** A `#total-amount` elembe írja az összeget.
-3. **Megjelenítés az alsó sávban:** Ugyanazt az összeget a `#bar-total` elembe is beírja (mobil nézethez).
+2. **Megjelenítés az oldalpanelen:** A `totalAmount` (`#total-amount`) elembe írja az összeget.
+3. **Megjelenítés az alsó sávban:** Ugyanazt az összeget a `barTotal` (`#bar-total`) elembe is beírja (mobil nézethez).
 
 #### Visszatért érték
 
@@ -198,49 +211,52 @@ function updateTotal() {
 
 ---
 
-### `renderSummary(compat)`
+### `renderSummary(conflicts)`
 
 Újraépíti az összegző panel tételeit.
 
 ### Működési elv lépésről lépésre:
 
 1. **Lista törlése:** A `summaryList` tartalmát üríti.
-2. **Kategóriák bejárása:** A `CATEGORIES` sorrendjében minden kategóriához készít egy `.summary-item` elemet. Az elem osztálya `selected` (ha van kiválasztott alkatrész) és `conflict` (ha van ütközés).
+2. **Kategóriák bejárása:** A `CATEGORIES` sorrendjében minden kategóriához készít egy `.summary-item` elemet. Ha a kategóriához tartozik ütközés, az elem megkapja a `conflict` osztályt (`classList.toggle`). A `selected` osztályt az elem nem kapja meg.
 3. **Kategórianév:** Egy `.sub` elembe kerül a kategória neve.
 4. **Tartalom:** Ha nincs kiválasztott alkatrész, a „nincs kiválasztva" szöveg jelenik meg, egyébként az alkatrész neve (`.part-name`) és ára (`.part-price`).
-5. **Ütközések:** Ha a kategóriához tartozik ütközés, minden üzenet egy `.conflict-text` elemben jelenik meg.
+5. **Ütközések:** A kategória minden ütközési üzenete egy `.conflict-text` elemben jelenik meg.
 6. **DOM-ba fűzés:** Az elkészült elem bekerül a `summaryList`-be.
 
 #### Paraméterek
 
-* **`compat`**
+* **`conflicts`**
 * A `checkCompatibility()` visszatérési értéke.
 
 > A szövegeket `textContent`-tel állítja be, így az adatokban lévő HTML nem értelmeződik.
 
 ---
 
-### `updateNavStatus(compat)`
+### `updateNavStatus(conflicts)`
 
 Frissíti a kategóriamenü gombjainak állapotát.
 
 ### Működési elv lépésről lépésre:
 
-1. **Gombok bejárása:** Minden `.nav-btn` elemen végigmegy.
+1. **Gombok bejárása:** A `navButtons` minden elemén végigmegy.
 2. **Pont (`.dot`) frissítése:** A `selected` osztályt megkapja, ha van kiválasztott alkatrész a kategóriában, a `conflict` osztályt pedig akkor, ha a kiválasztott alkatrész ütközésben van.
-3. **Aktív gomb:** Az `active` osztályt az aktuális kategória (`currentCategory`) gombja kapja.
+3. **Aktív gomb:** Az `active` osztályt az aktuális kategória (`currentCategory`) gombja kapja, a többiről lekerül. A kategóriaváltáskor a gombok aktív állapotát ez a függvény állítja be, az eseménykezelő nem.
 
 ---
 
-### `updateCardsBorder(compat)`
+### `updateCardsBorder(conflicts)`
 
-Frissíti a megjelenített kártyák keretét.
+Frissíti a megjelenített kártyák állapotát (kijelölés és ütközés).
 
 ### Működési elv lépésről lépésre:
 
-1. **Kártyák bejárása:** A `#cards` konténer minden `.card` elemén végigmegy.
-2. **Kijelölés ellenőrzése:** A kártya `data-part-id` értékét összeveti az aktuális kategória kiválasztott alkatrészének azonosítójával.
-3. **Osztályok:** A `selected` osztály a kijelölt kártyán van, a `conflict` osztály pedig a kijelölt és ütközésben lévő kártyán.
+1. **Ütközés vizsgálata:** Egyszer megnézi, van-e ütközés az aktuális kategóriában (`conflicts[currentCategory]`).
+2. **Kártyák bejárása:** A `#cards` konténer minden `.card` elemén végigmegy.
+3. **Kijelölés ellenőrzése:** A kártya `data-part-id` értékét összeveti az aktuális kategória kiválasztott alkatrészének azonosítójával.
+4. **Osztályok:** A `selected` osztály a kijelölt kártyán van, a `conflict` osztály pedig a kijelölt és ütközésben lévő kártyán.
+
+A kártyák állapotosztályait csak ez a függvény állítja. A `createCard()` nem állít be ilyet, a `render()` pedig az `updateUI()` hívásán keresztül ezt is lefuttatja.
 
 ---
 
@@ -250,19 +266,19 @@ Az összes állapotfüggő megjelenítést frissíti.
 
 ```javascript
 function updateUI() {
+    const conflicts = checkCompatibility(selected);
     updateTotal();
-    const compat = checkCompatibility(selected);
-    renderSummary(compat);
-    updateNavStatus(compat);
-    updateCardsBorder(compat);
+    renderSummary(conflicts);
+    updateNavStatus(conflicts);
+    updateCardsBorder(conflicts);
 }
 ```
 
 ### Működési elv lépésről lépésre:
 
-1. **Végösszeg frissítése:** `updateTotal()`.
-2. **Kompatibilitás ellenőrzése:** `checkCompatibility(selected)`, egyetlen alkalommal.
-3. **Részek frissítése:** Az eredményt átadja a `renderSummary()`, `updateNavStatus()` és `updateCardsBorder()` függvényeknek.
+1. **Kompatibilitás ellenőrzése:** `checkCompatibility(selected)`, egyetlen alkalommal.
+2. **Végösszeg frissítése:** `updateTotal()`.
+3. **Részek frissítése:** Az eredményt (`conflicts`) átadja a `renderSummary()`, `updateNavStatus()` és `updateCardsBorder()` függvényeknek.
 
 Ezt a függvényt kell meghívni minden olyan esemény után, amely módosítja a `selected` objektumot.
 
@@ -274,24 +290,16 @@ Egy alkatrészhez elkészíti a megjelenítendő kártyát.
 
 ### Működési elv lépésről lépésre:
 
-1. **Sablon kiválasztása:** A `partType` alapján megkeresi a megfelelő `<template>` elemet az `index.html`-ben (pl. `#processor-card-template`, `#gpu-card-template`). Ha nincs ilyen, üres `div`-et ad vissza.
+1. **Sablon kiválasztása:** A sablon azonosítója a kategória kulcsából képződik: `#<partType>-card-template` (pl. `#processors-card-template`, `#cpuCoolers-card-template`). Ha a sablon nem létezik, a függvény hibát dob.
 2. **Klónozás:** A sablon tartalmát klónozza, a kártya `data-part-id` attribútumába beírja az alkatrész azonosítóját.
-3. **Közös mezők:** A `.card-title` és a `.price` elembe beírja a nevet és az árat (`<ár> $`).
-4. **Kategóriafüggő mezők:** A kategóriától függően kitölti a sablon mezőit mértékegységgel:
-
-| Kategória | Kitöltött mezők |
-|----|----|
-| `processors` | brand, socket, cores, threads, base-clock (GHz), boost-clock (GHz), tdp (W) |
-| `gpus` | brand, interface, vram (GB), memory-type, tdp (W) |
-| `motherboards` | brand, cpu-socket, ram-type, form-factor |
-| `ram` | brand, ram-type, capacity (GB), speed (MHz) |
-| `storage` | brand, storage-type, interface, capacity (GB) |
-| `powerSupplies` | brand, wattage (W), efficiency |
-| `cases` | brand, supported-form-factor |
-| `cpuCoolers` | brand, supported-sockets (vesszővel elválasztva) |
-
-5. **Kijelölés állapota:** Ha az alkatrész már ki van választva, a kártya megkapja a `selected` (és szükség esetén a `conflict`) osztályt.
+3. **Cím:** A `.card-title` elembe beírja az alkatrész nevét.
+4. **Mezők automatikus kitöltése:** Az alkatrész objektum minden mezőjén végigmegy (`Object.entries(part)`). Ha a sablonban van a mező nevével megegyező osztályú elem (pl. `socket` → `.socket`, `baseClock` → `.baseClock`), beírja az értékét. A tömb értékeket vesszővel összefűzve írja ki (pl. `supportedSockets`).
+5. **Ár:** A `.price` elembe beírja az árat `<ár> $` formában.
 6. **Kattintás kezelése:** A kártya `click` eseménykezelője kijelöli az alkatrészt, vagy ha az már ki volt választva, visszavonja a kijelölést (`selected[partType] = null`), majd meghívja az `updateUI()` függvényt.
+
+A mértékegységek (GHz, W, GB, MHz) a HTML sablonban vannak, a JavaScript csak az értéket írja be. Új mező megjelenítéséhez elég a sablonba felvenni egy elemet, amelynek az osztálya a `db.json`-beli mezőnév (kis- és nagybetűre érzékenyen), a `createCard()` függvényt nem kell módosítani. A sablonok felépítését a [html.md](../html/html.md) írja le.
+
+A kártya `selected` és `conflict` osztályát nem ez a függvény állítja, hanem az `updateCardsBorder()`.
 
 #### Paraméterek
 
@@ -317,6 +325,8 @@ Kirajzolja a kártyákat.
 1. **Cím frissítése:** A `#section-title` a kategória nevét kapja.
 2. **Számláló frissítése:** A `#section-count` megjeleníti a darabszámot, pl. `(10 alkatrész)`.
 3. **Kártyák cseréje:** A `cards.replaceChildren(...)` lecseréli a konténer korábbi tartalmát az új kártyákra.
+
+Ha a `partType` nem szerepel a `CATEGORIES` listában, a függvény hibát dob.
 
 ---
 
@@ -390,9 +400,7 @@ async function loadSavedConfigFromUrl() {
         selected[category.key] = savedConfiguration.parts?.[category.key] ?? null;
     }
 
-    if (configNameInput) {
-        configNameInput.value = savedConfiguration.name || "";
-    }
+    configNameInput.value = savedConfiguration.name || "";
 }
 ```
 
@@ -415,11 +423,10 @@ navButtons.forEach(btn => {
 });
 ```
 
-1. A kattintott gomb lesz aktív, a többiről lekerül az `active` osztály.
-2. A keresőmező kiürül, a rendezés visszaáll az alapra.
-3. A `currentCategory` az új kategória kulcsa lesz (`data-part-type`).
-4. A `getParts()` lekéri az új kategória alkatrészeit a `currentParts` változóba.
-5. A `render()` kirajzolja a kártyákat.
+1. A keresőmező kiürül, a rendezés visszaáll az alapra.
+2. A `currentCategory` az új kategória kulcsa lesz (`data-part-type`).
+3. A `getParts()` lekéri az új kategória alkatrészeit a `currentParts` változóba.
+4. A `render()` kirajzolja a kártyákat. Az `updateUI()` hívásán keresztül az `updateNavStatus()` a kattintott gombra beállítja az `active` osztályt, a többiről leveszi.
 
 ### Keresés és rendezés
 
@@ -443,8 +450,10 @@ Gépeléskor és rendezésváltáskor a `render()` újra szűri és rendezi a li
 ### Konfiguráció mentése (`saveConfigBtn`)
 
 ```javascript
+const saveButtonText = saveConfigBtn.textContent;
+
 saveConfigBtn.addEventListener("click", async () => {
-    const name = configNameInput?.value?.trim() || "Névtelen konfiguráció";
+    const name = configNameInput.value.trim() || "Névtelen konfiguráció";
     const configData = {
         name: name,
         parts: { ...selected }
@@ -459,10 +468,16 @@ saveConfigBtn.addEventListener("click", async () => {
         } else {
             await postConfiguration(configData);
         }
-        // névmező ürítése, "Mentve! ✓" felirat 2 másodpercig
     } catch (err) {
         console.error("Hiba a mentés során:", err);
+        return;
     }
+
+    configNameInput.value = "";
+    saveConfigBtn.textContent = "Mentve! ✓";
+    setTimeout(() => {
+        saveConfigBtn.textContent = saveButtonText;
+    }, 2000);
 });
 ```
 
@@ -472,8 +487,8 @@ saveConfigBtn.addEventListener("click", async () => {
 2. **Adat összeállítása:** `{ name, parts }`, ahol a `parts` a `selected` másolata (az alkatrészek teljes objektumként, nem csak azonosítóval).
 3. **Azonos név keresése:** Lekéri az összes mentést, és megnézi, van-e azonos nevű (kis- és nagybetű számít).
 4. **Mentés:** Ha van, `PUT` kéréssel felülírja, ha nincs, `POST` kéréssel új konfigurációt hoz létre.
-5. **Visszajelzés:** A névmező kiürül, a gomb felirata 2 másodpercre `Mentve! ✓` lesz.
-6. **Hiba esetén:** A hibát csak a konzolra naplózza.
+5. **Hiba esetén:** A hibát a konzolra naplózza, és a függvény visszatér (`return`). Ilyenkor a névmező nem ürül, és a „Mentve!" felirat sem jelenik meg.
+6. **Visszajelzés:** A névmező kiürül, a gomb felirata 2 másodpercre `Mentve! ✓` lesz, majd visszaáll az eredeti szövegre. Az eredeti feliratot a `saveButtonText` tárolja, a fájl betöltésekor elmenti.
 
 ---
 
@@ -502,7 +517,8 @@ saveConfigBtn.addEventListener("click", async () => {
 
 ## Előfeltételek és függőségek
 
-* Az `index.html`-ben léteznie kell az összes fent felsorolt azonosítójú elemnek és a nyolc `<template>` elemnek.
+* Az `index.html`-ben léteznie kell az összes fent felsorolt azonosítójú elemnek és a nyolc `<template>` elemnek (`<kategóriakulcs>-card-template` azonosítóval). A kód nem ellenőrzi az elemek meglétét, hiányzó elem esetén hibát dob.
+* A sablonokban az érték elemek osztályának egyeznie kell a `db.json` mezőneveivel (camelCase).
 * A json-servernek futnia kell, és a [db.json](../adatok/db.json.md) kategóriáinak neve egyeznie kell a `CATEGORIES` kulcsaival.
 * A [fetch.js](./fetch.js.md) függvényeinek elérhetőnek kell lenniük.
 
@@ -517,3 +533,5 @@ saveConfigBtn.addEventListener("click", async () => {
 * **Alaplap és videokártya:** Az alaplap `gpuInterface` mezőjére nincs ellenőrzés.
 * **Mentett adat:** A mentés az alkatrész teljes másolatát tárolja, ezért ha az alkatrész ára később megváltozik a `db.json`-ban, a mentett konfiguráció a régi árat használja.
 * **Pénznem:** Az árak dollárban (`$`) jelennek meg.
+* **Hiányzó elemek:** A HTML elemek meglétét a kód feltételezi (nincsenek null-ellenőrzések), ezért egy hiányzó azonosítójú elem vagy sablon hibát okoz az oldal betöltésekor.
+* **Mezőnevek:** A kártyák és a kompatibilitás-ellenőrzés a `db.json` camelCase mezőneveire épül. Más nevű (pl. snake_case) mezőt nem tudnak kezelni.

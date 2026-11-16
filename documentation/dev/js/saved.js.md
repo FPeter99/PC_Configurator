@@ -37,6 +37,7 @@ A sorrend adja meg, hogy az alkatrészek milyen sorrendben jelennek meg egy konf
 
 | Változó | Szelektor | Szerepe |
 |----|----|----|
+| `container` | `#saved-configs-list` | a konfigurációk konténere |
 | `deleteDialogEl` | `#delete-modal` | a törlés megerősítő `<dialog>` ablaka |
 | `deleteFormEl` | `#delete-form` | az ablakban lévő űrlap |
 | `deleteConfigNameEl` | `#delete-config-name` | a törlendő konfiguráció neve az ablakban |
@@ -52,10 +53,10 @@ Egy mentett konfigurációhoz elkészíti a megjelenítendő kártyát.
 
 ### Működési elv lépésről lépésre:
 
-1. **Sablon klónozása:** A `#saved-config-template` tartalmát klónozza. Ha a sablon nem található, üres `div`-et ad vissza.
-2. **Név beírása:** A `.config-name` elem a konfiguráció nevét kapja.
-3. **Alkatrészek listázása:** A `CATEGORIES` sorrendjében minden kategóriához létrehoz egy `<li>` elemet. A tartalma `<kategória>: <név> (<ár> $)`, vagy `Nincs kiválasztva`, ha a kategóriához nincs alkatrész.
-4. **Végösszeg számítása:** A kiválasztott alkatrészek árát összeadja, és a `.config-total` elembe `Végösszeg: <összeg> $` formában beírja.
+1. **Sablon klónozása:** A `#saved-config-template` tartalmát klónozza.
+2. **Alkatrészek listázása:** A `CATEGORIES` sorrendjében minden kategóriához létrehoz egy `<li>` elemet, benne két `span` elemmel: a `.part-category` a kategória nevét (`<kategória>:`), a `.part-value` az alkatrészt (`<név> (<ár> $)`) vagy a `Nincs kiválasztva` szöveget tartalmazza, ha a kategóriához nincs alkatrész.
+3. **Végösszeg számítása:** Ugyanebben a ciklusban összeadja a kiválasztott alkatrészek árát.
+4. **Név és végösszeg:** A `.config-name` elem a konfiguráció nevét, a `.config-total` elem a `Végösszeg: <összeg> $` szöveget kapja.
 5. **Betöltés gomb:** Kattintásra átirányít az `index.html?load=<id>` címre.
 6. **Törlés gomb:** Kattintásra a megerősítő ablak `data-id` attribútumába beírja az azonosítót, megjeleníti a konfiguráció nevét, és megnyitja az ablakot (`showModal()`).
 
@@ -67,9 +68,9 @@ Egy mentett konfigurációhoz elkészíti a megjelenítendő kártyát.
 
 #### Visszatért érték
 
-* Egy `.saved-config-item` elem (a klónozott sablonból).
+* Egy `DocumentFragment` (a klónozott sablon), amely a `.saved-config-item` elemet tartalmazza.
 
-> Az alkatrészek sorait `innerHTML`-lel írja ki, így az alkatrész nevében lévő HTML értelmeződne. A konfiguráció neve `textContent`-tel kerül ki, ezért az biztonságos.
+> Minden szöveget `textContent`-tel állít be (az alkatrészek soraiban is), így az adatokban lévő HTML nem értelmeződik.
 
 ---
 
@@ -79,21 +80,16 @@ Betölti és megjeleníti az összes mentett konfigurációt.
 
 ```javascript
 async function initSavedConfigs() {
-    const container = document.querySelector("#saved-configs-list");
-    if (!container) return;
-
     try {
         const savedConfigurations = await getConfigurations();
-        if (!savedConfigurations || savedConfigurations.length === 0) {
+        if (savedConfigurations.length === 0) {
             container.innerHTML = `<p class="empty-configs">Nincsenek mentett konfigurációk.</p>`;
             return;
         }
 
-        const configCards = [];
-        for (const savedConfiguration of savedConfigurations) {
-            configCards.push(createSavedConfigItem(savedConfiguration));
-        }
-        container.replaceChildren(...configCards);
+        container.replaceChildren(
+            ...savedConfigurations.map(createSavedConfigItem)
+        );
     } catch (err) {
         console.error("Hiba a mentett konfigurációk betöltésekor:", err);
         container.innerHTML = `<p class="empty-configs">Hiba történt a konfigurációk betöltésekor.</p>`;
@@ -103,12 +99,10 @@ async function initSavedConfigs() {
 
 ### Működési elv lépésről lépésre:
 
-1. **Konténer keresése:** A `#saved-configs-list` elemet keresi, ha nincs, leáll.
-2. **Konfigurációk lekérése:** A `getConfigurations()` visszaadja az összes mentést.
-3. **Üres állapot:** Ha nincs mentés, a „Nincsenek mentett konfigurációk." szöveg jelenik meg.
-4. **Kártyák létrehozása:** Minden konfigurációhoz elkészíti a kártyát a `createSavedConfigItem()` függvénnyel.
-5. **Megjelenítés:** `replaceChildren()` lecseréli a konténer tartalmát (a „betöltés..." szöveget) a kártyákra.
-6. **Hiba esetén:** A konzolra naplóz, és a „Hiba történt a konfigurációk betöltésekor." szöveg jelenik meg.
+1. **Konfigurációk lekérése:** A `getConfigurations()` visszaadja az összes mentést.
+2. **Üres állapot:** Ha nincs mentés, a „Nincsenek mentett konfigurációk." szöveg jelenik meg.
+3. **Kártyák létrehozása és megjelenítés:** A `map()` minden konfigurációhoz elkészíti a kártyát a `createSavedConfigItem()` függvénnyel, a `replaceChildren()` pedig lecseréli a konténer tartalmát (a „betöltés..." szöveget) a kártyákra.
+4. **Hiba esetén:** A konzolra naplóz, és a „Hiba történt a konfigurációk betöltésekor." szöveg jelenik meg.
 
 ---
 
@@ -117,7 +111,7 @@ async function initSavedConfigs() {
 ### Törlés megerősítése (`deleteFormEl`, `submit`)
 
 ```javascript
-deleteFormEl?.addEventListener("submit", async (event) => {
+deleteFormEl.addEventListener("submit", async (event) => {
     event.preventDefault();
     await deleteConfiguration(deleteDialogEl.dataset.id);
     deleteDialogEl.close();
@@ -133,7 +127,7 @@ deleteFormEl?.addEventListener("submit", async (event) => {
 ### Mégse (`cancelDeleteBtnEl`, `click`)
 
 ```javascript
-cancelDeleteBtnEl?.addEventListener("click", () => {
+cancelDeleteBtnEl.addEventListener("click", () => {
     deleteDialogEl.close();
 });
 ```
@@ -159,3 +153,4 @@ A fájl végén az `initSavedConfigs()` függvény hívása indítja a lista bet
 
 * A törlés (`deleteConfiguration`) hívása körül nincs `try/catch`: hálózati hiba esetén a megerősítő ablak nyitva marad, a felhasználó nem kap visszajelzést.
 * A konfiguráció összegét a mentett árakból számolja, nem a jelenlegi `db.json` árakból.
+* A HTML elemek meglétét a kód feltételezi (nincsenek null-ellenőrzések), ezért egy hiányzó azonosítójú elem vagy sablon hibát okoz.

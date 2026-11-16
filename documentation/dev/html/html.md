@@ -45,18 +45,27 @@ A kártyák nem a JavaScriptben készülnek el teljesen, hanem `<template>` elem
 
 | Sablon azonosító | Kategória |
 |----|----|
-| `processor-card-template` | processors |
-| `gpu-card-template` | gpus |
-| `motherboard-card-template` | motherboards |
+| `processors-card-template` | processors |
+| `gpus-card-template` | gpus |
+| `motherboards-card-template` | motherboards |
 | `ram-card-template` | ram |
 | `storage-card-template` | storage |
-| `power-supply-card-template` | powerSupplies |
-| `case-card-template` | cases |
-| `cpu-cooler-card-template` | cpuCoolers |
+| `powerSupplies-card-template` | powerSupplies |
+| `cases-card-template` | cases |
+| `cpuCoolers-card-template` | cpuCoolers |
 
-Minden sablon `.card` elemből áll, benne `.card-title`, `.specs` (soronként egy `.row`, két `span`-nel: címke és érték) és `.price`. Az értékek `span` elemeinek osztálya (pl. `.socket`, `.tdp`, `.capacity`) egyezik a `createCard()` szelektoraival.
+A sablon azonosítója mindig `<kategóriakulcs>-card-template`, mert a `createCard()` ebből a mintából keresi meg.
 
-> Új mező hozzáadásakor a sablonba is fel kell venni egy `.row` elemet a megfelelő osztállyal, és a `createCard()` függvényben is ki kell tölteni.
+Minden sablon `.card` elemből áll, benne `.card-title`, `.specs` (soronként egy `.row`, két `span`-nel: címke és érték) és `.price`. Az érték `span` osztálya megegyezik az alkatrész `db.json`-beli mezőnevével (pl. `socket`, `baseClock`, `supportedSockets`, kis- és nagybetűre érzékenyen), a `createCard()` ezeket automatikusan kitölti. A mértékegység a sablonban van, az érték elem mellett:
+
+```html
+<div class="row">
+    <span>Alap órajel</span>
+    <span><span class="baseClock"></span> GHz</span>
+</div>
+```
+
+> Új mező hozzáadásakor elég a sablonba felvenni egy `.row` elemet, amelynek érték `span`-jén a mező neve az osztály. A `createCard()` függvényt nem kell módosítani.
 
 ---
 
@@ -121,8 +130,8 @@ Ezeket a JavaScript kapcsolja:
 
 | Osztály | Hol | Jelentése |
 |----|----|----|
-| `.active` | `.nav-btn` | az aktuális kategória (a `.header-btn` `active` osztálya a HTML-ben fix) |
-| `.selected` | `.card`, `.summary-item`, `.dot` | kiválasztott alkatrész |
+| `.active` | `.nav-btn` | az aktuális kategória (az `updateNavStatus()` állítja; a `.header-btn` `active` osztálya a HTML-ben fix) |
+| `.selected` | `.card`, `.dot` | kiválasztott alkatrész |
 | `.conflict` | `.card`, `.summary-item`, `.dot` | kiválasztott, de ütköző alkatrész |
 | `.open` | `#cat-nav`, `#summary`, `#menu-toggle` | mobil menü / panel nyitva |
 | `.panel-open` | `body` | az összegző panel nyitva van |
